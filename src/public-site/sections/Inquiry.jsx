@@ -36,18 +36,25 @@ function Select({ value, onChange, children, ariaLabel }) {
         aria-label={ariaLabel}
         value={value}
         onChange={onChange}
-        className="w-full cursor-pointer appearance-none rounded-md bg-surface/75 py-3 pe-4 ps-9 text-ink outline-none transition-colors hover:bg-surface focus:bg-surface"
+        className="w-full cursor-pointer appearance-none truncate rounded-md bg-surface/75 py-3 pe-8 ps-3 text-ink outline-none transition-colors hover:bg-surface focus:bg-surface sm:pe-9 sm:ps-4"
       >
         {children}
       </select>
-      {/* Chevron sits on the inline-end (left in RTL) */}
+      {/* Chevron sits on the inline-end (left in RTL).
+
+          The padding above must be on the SAME side. It was `ps-9` —
+          padding-inline-START, which in RTL is the right edge, i.e.
+          the side with nothing on it — while the chevron sat on the
+          left behind only `pe-4`. So the value ran straight under the
+          arrow. Positioned with the logical `end-3` now, so the two
+          cannot drift apart again if direction ever changes. */}
       <svg
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.4"
         aria-hidden="true"
-        className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+        className="pointer-events-none absolute end-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
       >
         <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -265,7 +272,11 @@ export default function Inquiry() {
                   {/* Jalali date picker — three padded selects, no Gregorian */}
                   <div>
                     <span className="mb-2 block text-sm text-muted">تاریخ مورد نظر</span>
-                    <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                    {/* Unequal columns on purpose. Three equal thirds
+                        gave the month the same width as the day, and
+                        «اردیبهشت» is eight characters against one —
+                        it was being clipped to «اردی» on a phone. */}
+                    <div className="grid grid-cols-[0.8fr_1.5fr_1fr] gap-2 sm:grid-cols-3 sm:gap-4">
                       <Select value={form.jd} onChange={set('jd')} ariaLabel="روز">
                         {daysIn(+form.jy, +form.jm).map((d) => (
                           <option key={d} value={d}>
