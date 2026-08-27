@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.env.local
+.DS_Store
+*.log
+
+# Private sales/strategy notes — must never reach a public repo
+Talar.txt
+تالار-نکات-مذاکره.md
+*نکات*.md

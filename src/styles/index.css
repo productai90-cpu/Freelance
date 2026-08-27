@@ -1,0 +1,249 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   FONTS — self-hosted, variable weight.
+   Referenced relatively from src/assets so Vite hashes them and
+   emits relative URLs that survive the GitHub Pages subpath.
+   ============================================================ */
+
+@font-face {
+  font-family: 'Estedad';
+  src: url('../assets/fonts/Estedad-Variable.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../assets/fonts/Vazirmatn-Variable.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================
+   DESIGN TOKENS — "Marble"
+   Sampled from the venue photography: cream linen, dark walnut,
+   brass candlelight, slate napkins, travertine stone.
+   ============================================================ */
+
+@theme {
+  /* — Surfaces —————————————————————————— */
+  --color-ink: #221f1b; /* darkest: walnut beams */
+  --color-stone: #2e2a25; /* raised surface on dark */
+  --color-ivory: #f7f3ec; /* primary light ground */
+  --color-cream: #ede5d8; /* linen / cards */
+  --color-vein: #d9cebb; /* marble veining, hairlines */
+
+  /* — The one metal ————————————————————— */
+  --color-brass: #c2a575; /* candlelight + pendant lamps */
+  --color-brass-deep: #9a7f52; /* hover / pressed only */
+
+  /* — Supporting neutral (from the slate napkins) —— */
+  --color-slate: #565c63;
+
+  /* — Type —————————————————————————————— */
+  --color-text: #33302b;
+  --color-text-lt: #e8e1d5;
+  --color-muted: #7a736a;
+  --color-muted-lt: #a9a094;
+
+  /* — Booking status: desaturated on purpose.
+       A calm object, never a traffic light. ——————— */
+  --color-free: #7e8f7c;
+  --color-tentative: #c2a575;
+  --color-booked: #a9695c;
+
+  /* — Families ——————————————————————————— */
+  --font-display: 'Estedad', 'Vazirmatn', system-ui, sans-serif;
+  --font-body: 'Vazirmatn', 'Estedad', system-ui, sans-serif;
+
+  /* — Motion: short travel, slow timing, soft easing ———— */
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --duration-quick: 240ms;
+  --duration-base: 420ms;
+  --duration-slow: 640ms;
+  --duration-entrance: 900ms;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-weight: 350;
+    font-feature-settings: 'ss01';
+    line-height: 1.85; /* Persian needs more leading than Latin */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Persian display type: light weights, loose tracking, tight leading.
+     Restraint over weight — this is where the luxury register is set. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    line-height: 1.45;
+    /* Never letter-space Arabic script — it severs the letter joins
+       and the word visually falls apart. Openness comes from word
+       spacing and leading instead. */
+    letter-spacing: 0;
+  }
+
+  ::selection {
+    background: var(--color-brass);
+    color: var(--color-ink);
+  }
+
+  /* Focus ring: brass, never the default blue */
+  :focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Persian numerals everywhere numbers appear as text */
+  .num {
+    font-feature-settings: 'ss02';
+    font-variant-numeric: normal;
+  }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
+@layer utilities {
+  /* Eyebrow label — small, spaced, brass. Used above section titles. */
+  /* Eyebrow label — small, airy, brass. The spaced-out look comes from
+     word-spacing, not letter-spacing, so Persian letter joins survive. */
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    word-spacing: 0.35em;
+    color: var(--color-brass);
+  }
+
+  /* Hairline rules — the marble inlay motif */
+  .hairline {
+    height: 1px;
+    background: var(--color-vein);
+  }
+  .hairline-brass {
+    height: 1px;
+    background: color-mix(in srgb, var(--color-brass) 45%, transparent);
+  }
+
+  /* Fine grain, laid over photography. Masks upscaling on the hero
+     and gives flat ivory panels a papery quality. */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+  }
+
+  .fluid-display {
+    font-size: clamp(2.5rem, 7vw, 5.25rem);
+  }
+  .fluid-title {
+    font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  }
+}
+
+/* ============================================================
+   AMBIENT ANIMATION
+   Pure CSS so the hero starts drifting before React hydrates.
+   Only transform/opacity — both GPU-composited.
+   ============================================================ */
+
+@keyframes kenburns {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.06) translate3d(0, -1.2%, 0);
+  }
+}
+
+.animate-kenburns {
+  animation: kenburns 24s var(--ease-inout) infinite alternate;
+  will-change: transform;
+}
+
+@keyframes scrollcue {
+  0% {
+    transform: translateY(-100%);
+  }
+  55%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-scrollcue {
+  animation: scrollcue 2.4s var(--ease-inout) infinite;
+}
+
+/* ------------------------------------------------------------
+   HERO GRADING — differs by which photograph <picture> selected.
+   Landscape gets daylight graded down to dusk; portrait is an
+   already-lit evening room and only needs a light touch.
+   ------------------------------------------------------------ */
+
+.hero-photo {
+  filter: brightness(0.72) contrast(1.04) saturate(0.9);
+}
+
+@media (orientation: portrait) {
+  .hero-photo {
+    filter: brightness(0.94) contrast(1.02) saturate(0.95);
+  }
+  /* The night photograph carries its own shadows — a full-strength
+     grade on top would crush it to mud. */
+  .hero-grade {
+    opacity: 0.55;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY — motion is a preference, not a given
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
