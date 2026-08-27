@@ -131,16 +131,30 @@ export function DataProvider({ children }) {
     })
 
     if (isLive && created) {
+      const tempId = created.id
       Promise.all([
         remote.insertBooking(created),
         remote.updateLeadStatus(leadId, 'converted'),
-      ]).catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error('[convert] failed', err)
-      })
+      ])
+        .then(([saved]) => {
+          /* The optimistic row was given `b<timestamp>`; the database
+             generated a uuid. Left unreconciled the two drift apart —
+             the detail screen we are about to navigate to would 404
+             after any refresh, and every later edit would patch an id
+             that does not exist. Swap it for the real one. */
+          setState((s) => ({
+            ...s,
+            bookings: s.bookings.map((b) => (b.id === tempId ? { ...b, id: saved.id } : b)),
+          }))
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error('[convert] failed', err)
+          notify('ذخیرهٔ رزرو ناموفق بود.')
+        })
     }
     return created
-  }, [])
+  }, [notify])
 
   const updateBooking = useCallback((id, patch) => {
     setState((s) => ({

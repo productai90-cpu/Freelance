@@ -77,7 +77,7 @@ export default function Nav({ heroVariant, onToggleHero }) {
     <>
       {/* ——— Top bar: wordmark always, numbers only once scrolled ——— */}
       <header
-        className={`fixed inset-x-0 top-0 z-40 transition-all duration-[420ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+        className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ease-[cubic-bezier(.22,.61,.36,1)] ${
           solid
             ? 'border-b border-line bg-surface/92 backdrop-blur-md'
             : 'border-b border-transparent bg-transparent'
@@ -87,7 +87,7 @@ export default function Nav({ heroVariant, onToggleHero }) {
           <a href="#top" className="flex items-center gap-2.5">
             <Monogram size={solid ? 30 : 34} tone={solid ? 'dark' : 'light'} />
             <span
-              className={`font-display font-light transition-all duration-[420ms] ${
+              className={`font-display font-light transition-all duration-300 ${
                 solid ? 'text-xl text-ink' : 'text-2xl text-surface'
               }`}
             >

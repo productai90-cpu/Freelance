@@ -34,7 +34,7 @@ export default function BookingsList() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: dim ? 0.55 : 1, y: 0 }}
         transition={{ duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
-        className="w-full rounded-xl border border-line bg-surface p-4 text-right transition-colors hover:border-accent/50"
+        className="w-full rounded-xl border border-line bg-surface p-4 text-right transition-colors duration-300 hover:border-accent/50"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">

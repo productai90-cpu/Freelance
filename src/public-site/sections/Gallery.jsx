@@ -41,7 +41,7 @@ function Frame({ shot, className = '', onOpen, priority = false, parallaxY = nul
             alt={shot.caption}
             loading={priority ? 'eager' : 'lazy'}
             decoding="async"
-            className="photo-cool h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.04]"
+            className="photo-cool h-full w-full object-cover transition-transform duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.04]"
           />
         </motion.div>
       ) : (
@@ -50,19 +50,19 @@ function Frame({ shot, className = '', onOpen, priority = false, parallaxY = nul
           alt={shot.caption}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
-          className="photo-cool absolute inset-0 h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.04]"
+          className="photo-cool absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.04]"
         />
       )}
 
       {/* Accent wash on hover */}
-      <span className="pointer-events-none absolute inset-0 bg-accent/0 transition-colors duration-700 group-hover:bg-accent/10" />
+      <span className="pointer-events-none absolute inset-0 bg-accent/0 transition-colors duration-300 group-hover:bg-accent/10" />
 
       {/* Caption — identical p-5 on every frame */}
       <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-scrim/85 to-transparent p-4 pt-14 text-right sm:p-5">
-        <span className="block translate-y-2 text-sm text-surface opacity-0 transition-all duration-[600ms] ease-[cubic-bezier(.22,.61,.36,1)] group-hover:translate-y-0 group-hover:opacity-100">
+        <span className="block translate-y-2 text-sm text-surface opacity-0 transition-all duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:translate-y-0 group-hover:opacity-100">
           {shot.caption}
         </span>
-        <span className="mt-2 block h-px w-0 bg-accent/70 transition-all duration-[700ms] ease-[cubic-bezier(.65,0,.35,1)] group-hover:w-16" />
+        <span className="mt-2 block h-px w-0 bg-accent/70 transition-all duration-300 ease-[cubic-bezier(.65,0,.35,1)] group-hover:w-16" />
       </span>
     </button>
   )
@@ -179,7 +179,7 @@ export default function Gallery() {
             <button
               onClick={() => setActive(null)}
               aria-label="بستن"
-              className="absolute left-5 top-5 h-10 w-10 text-surface/70 transition-colors hover:text-surface"
+              className="absolute left-5 top-5 h-10 w-10 text-surface/70 transition-colors duration-300 hover:text-surface"
             >
               <span className="absolute left-1/2 top-1/2 block h-px w-6 -translate-x-1/2 rotate-45 bg-current" />
               <span className="absolute left-1/2 top-1/2 block h-px w-6 -translate-x-1/2 -rotate-45 bg-current" />

@@ -42,7 +42,7 @@ function PackageCard({ pk, index, onOpen, reduce }) {
         onClick={() => onOpen(pk)}
         aria-haspopup="dialog"
         aria-label={`منوی کامل ${pk.name}`}
-        className="group relative flex h-full w-full flex-col overflow-hidden border border-line bg-surface text-right shadow-soft transition-[box-shadow,transform] duration-500 ease-[cubic-bezier(.22,.61,.36,1)] hover:-translate-y-1 hover:shadow-lift focus-visible:-translate-y-1"
+        className="group relative flex h-full w-full flex-col overflow-hidden border border-line bg-surface text-right shadow-soft transition-[box-shadow,transform] duration-300 ease-[cubic-bezier(.22,.61,.36,1)] hover:-translate-y-1 hover:shadow-lift focus-visible:-translate-y-1"
       >
         {/* Photograph — the only warm thing on the card */}
         <span className="relative block aspect-[5/4] overflow-hidden bg-line/25">
@@ -51,9 +51,9 @@ function PackageCard({ pk, index, onOpen, reduce }) {
             alt={pk.alt}
             loading="lazy"
             decoding="async"
-            className="photo-cool h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.05]"
+            className="photo-cool h-full w-full object-cover transition-transform duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.05]"
           />
-          <span className="pointer-events-none absolute inset-0 bg-accent/0 transition-colors duration-700 group-hover:bg-accent/10" />
+          <span className="pointer-events-none absolute inset-0 bg-accent/0 transition-colors duration-300 group-hover:bg-accent/10" />
 
           {pk.badge && (
             <span className="absolute right-4 top-4 bg-surface/95 px-3 py-1.5 text-[11px] text-accent-deep shadow-soft backdrop-blur-sm">
@@ -81,7 +81,7 @@ function PackageCard({ pk, index, onOpen, reduce }) {
               delay={0.2 + step}
               reduce={reduce}
               trigger={shown ? 'now' : 'hold'}
-              className="h-7 w-7 text-accent-deep transition-transform duration-500 group-hover:scale-110"
+              className="h-7 w-7 text-accent-deep transition-transform duration-300 group-hover:scale-110"
             />
           </span>
 
@@ -106,7 +106,7 @@ function PackageCard({ pk, index, onOpen, reduce }) {
             <span>مشاهدهٔ منوی کامل</span>
             <span
               aria-hidden
-              className="inline-block transition-transform duration-500 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:-translate-x-1.5"
+              className="inline-block transition-transform duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:-translate-x-1.5"
             >
               ←
             </span>
@@ -114,7 +114,7 @@ function PackageCard({ pk, index, onOpen, reduce }) {
         </span>
 
         {/* Accent rule grows from the inline-start (right) edge */}
-        <span className="absolute bottom-0 right-0 h-px w-0 bg-accent transition-all duration-700 ease-[cubic-bezier(.65,0,.35,1)] group-hover:w-full" />
+        <span className="absolute bottom-0 right-0 h-px w-0 bg-accent transition-all duration-300 ease-[cubic-bezier(.65,0,.35,1)] group-hover:w-full" />
       </button>
     </Reveal>
   )
@@ -202,7 +202,7 @@ function PackageDialog({ pk, onClose, onDownload, pdfState, reduce }) {
           type="button"
           onClick={onClose}
           aria-label="بستن"
-          className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center bg-surface/90 text-ink/70 backdrop-blur-sm transition-colors hover:text-ink sm:left-4 sm:top-4"
+          className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center bg-surface/90 text-ink/70 backdrop-blur-sm transition-colors duration-300 hover:text-ink sm:left-4 sm:top-4"
         >
           <span className="absolute h-px w-5 rotate-45 bg-current" />
           <span className="absolute h-px w-5 -rotate-45 bg-current" />
@@ -293,7 +293,7 @@ function PackageDialog({ pk, onClose, onDownload, pdfState, reduce }) {
                 <a
                   href="#inquiry"
                   onClick={onClose}
-                  className="bg-ink px-7 py-3 text-sm text-surface transition-colors duration-500 hover:bg-accent-deep"
+                  className="bg-ink px-7 py-3 text-sm text-surface transition-colors duration-300 hover:bg-accent-deep"
                 >
                   استعلام تاریخ و مشاوره
                 </a>
@@ -301,7 +301,7 @@ function PackageDialog({ pk, onClose, onDownload, pdfState, reduce }) {
                   type="button"
                   onClick={onDownload}
                   disabled={pdfState === 'working'}
-                  className="border border-line px-7 py-3 text-sm text-ink transition-colors duration-500 hover:border-accent-deep hover:text-accent-deep disabled:opacity-60"
+                  className="border border-line px-7 py-3 text-sm text-ink transition-colors duration-300 hover:border-accent-deep hover:text-accent-deep disabled:opacity-60"
                 >
                   {pdfState === 'working'
                     ? menu.pdf.working
@@ -377,7 +377,7 @@ export default function Menu() {
                 onClick={download}
                 disabled={pdfState === 'working'}
                 aria-live="polite"
-                className="bg-ink px-8 py-3 text-sm text-surface transition-colors duration-500 hover:bg-accent-deep disabled:opacity-60"
+                className="bg-ink px-8 py-3 text-sm text-surface transition-colors duration-300 hover:bg-accent-deep disabled:opacity-60"
               >
                 {pdfState === 'working'
                   ? menu.pdf.working
@@ -388,7 +388,7 @@ export default function Menu() {
 
               <a
                 href="#inquiry"
-                className="border border-line px-8 py-3 text-sm text-ink transition-colors duration-500 hover:border-accent-deep hover:text-accent-deep"
+                className="border border-line px-8 py-3 text-sm text-ink transition-colors duration-300 hover:border-accent-deep hover:text-accent-deep"
               >
                 استعلام تاریخ
               </a>

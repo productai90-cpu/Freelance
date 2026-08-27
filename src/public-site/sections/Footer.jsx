@@ -44,7 +44,7 @@ export default function Footer() {
                 <a
                   href={`tel:${hall.phoneHref}`}
                   dir="ltr"
-                  className="num inline-block transition-colors hover:text-accent-deep"
+                  className="num inline-block transition-colors duration-300 hover:text-accent-deep"
                 >
                   {hall.phone}
                 </a>
@@ -53,7 +53,7 @@ export default function Footer() {
                 <a
                   href={`tel:${hall.mobileHref}`}
                   dir="ltr"
-                  className="num inline-block transition-colors hover:text-accent-deep"
+                  className="num inline-block transition-colors duration-300 hover:text-accent-deep"
                 >
                   {hall.mobile}
                 </a>
@@ -63,7 +63,7 @@ export default function Footer() {
                   href={hall.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="transition-colors hover:text-accent-deep"
+                  className="transition-colors duration-300 hover:text-accent-deep"
                 >
                   اینستاگرام@{hall.instagram}
                 </a>

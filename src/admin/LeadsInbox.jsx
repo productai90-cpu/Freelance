@@ -20,7 +20,15 @@ const BADGE = {
   new: { label: 'جدید', cls: 'bg-booked/12 text-booked border-booked/30' },
   contacted: { label: 'تماس گرفته شد', cls: 'bg-tentative/12 text-accent-deep border-accent/30' },
   converted: { label: 'تبدیل شد', cls: 'bg-free/12 text-free border-free/30' },
+  archived: { label: 'لغو شد', cls: 'bg-line/40 text-muted border-line' },
 }
+
+/* Shared so the three actions are one row of the same object, not
+   three buttons that happen to sit together. Only «تبدیل به رزرو» is
+   filled — it is the one irreversible, revenue-shaped action on the
+   screen, and the other two must not compete with it. */
+const BTN = 'rounded-lg py-2.5 text-xs transition-colors duration-300'
+const OUTLINE = `${BTN} border px-4`
 
 export default function LeadsInbox() {
   const { leads, convertLead, markLead, notify } = useData()
@@ -43,7 +51,9 @@ export default function LeadsInbox() {
         <AnimatePresence initial={false}>
           {leads.map((lead) => {
             const badge = BADGE[lead.status] ?? BADGE.new
-            const done = lead.status === 'converted'
+            const converted = lead.status === 'converted'
+            const archived = lead.status === 'archived'
+            const done = converted || archived
 
             return (
               <motion.article
@@ -99,18 +109,54 @@ export default function LeadsInbox() {
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => onConvert(lead)}
-                      className="flex-1 rounded-lg bg-ink py-2.5 text-xs text-surface transition-opacity hover:opacity-90"
+                      className={`${BTN} flex-1 bg-ink text-surface hover:bg-accent-deep`}
                     >
                       تبدیل به رزرو
                     </button>
-                    {lead.status === 'new' && (
-                      <button
-                        onClick={() => markLead(lead.id, 'contacted')}
-                        className="rounded-lg border border-line px-4 py-2.5 text-xs text-muted transition-colors hover:text-ink"
-                      >
-                        تماس گرفتم
-                      </button>
-                    )}
+
+                    {/* Stays on screen after it is used, and stays an
+                        outline. Filling it in would put two solid
+                        buttons beside each other and lose which one is
+                        the real action. The accent border carries the
+                        state instead. Tapping again undoes it — this is
+                        a phone, mis-taps happen. */}
+                    <button
+                      onClick={() =>
+                        markLead(lead.id, lead.status === 'contacted' ? 'new' : 'contacted')
+                      }
+                      aria-pressed={lead.status === 'contacted'}
+                      className={`${OUTLINE} ${
+                        lead.status === 'contacted'
+                          ? 'border-accent bg-accent/10 text-accent-deep'
+                          : 'border-line text-muted hover:text-ink'
+                      }`}
+                    >
+                      {lead.status === 'contacted' ? '✓ تماس گرفتم' : 'تماس گرفتم'}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        markLead(lead.id, 'archived')
+                        notify(`استعلام «${lead.name}» لغو شد`)
+                      }}
+                      className={`${OUTLINE} border-line text-muted hover:border-danger hover:text-danger`}
+                    >
+                      لغو
+                    </button>
+                  </div>
+                )}
+
+                {/* Cancelling is one tap, so it has to be one tap back.
+                    Cheaper than a confirmation dialog and kinder than
+                    losing an enquiry to a mis-tap. */}
+                {archived && (
+                  <div className="mt-4">
+                    <button
+                      onClick={() => markLead(lead.id, 'new')}
+                      className={`${OUTLINE} w-full border-line text-muted hover:text-ink`}
+                    >
+                      بازگرداندن به لیست
+                    </button>
                   </div>
                 )}
               </motion.article>

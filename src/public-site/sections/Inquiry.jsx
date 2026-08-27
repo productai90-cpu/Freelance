@@ -15,7 +15,7 @@ function Field({ label, children }) {
   return (
     <label className="group block">
       {label && (
-        <span className="mb-2 block text-sm text-muted transition-colors group-focus-within:text-accent">
+        <span className="mb-2 block text-sm text-muted transition-colors duration-300 group-focus-within:text-accent">
           {label}
         </span>
       )}
@@ -36,7 +36,7 @@ function Select({ value, onChange, children, ariaLabel }) {
         aria-label={ariaLabel}
         value={value}
         onChange={onChange}
-        className="w-full cursor-pointer appearance-none truncate rounded-md bg-surface/75 py-3 pe-8 ps-3 text-ink outline-none transition-colors hover:bg-surface focus:bg-surface sm:pe-9 sm:ps-4"
+        className="w-full cursor-pointer appearance-none truncate rounded-md bg-surface/75 py-3 pe-8 ps-3 text-ink outline-none transition-colors duration-300 hover:bg-surface focus:bg-surface sm:pe-9 sm:ps-4"
       >
         {children}
       </select>
@@ -63,7 +63,7 @@ function Select({ value, onChange, children, ariaLabel }) {
 }
 
 const inputCls =
-  'w-full rounded-md bg-surface/75 px-4 py-3 text-ink outline-none transition-colors placeholder:text-muted/45 hover:bg-surface focus:bg-surface'
+  'w-full rounded-md bg-surface/75 px-4 py-3 text-ink outline-none transition-colors duration-300 placeholder:text-muted/45 hover:bg-surface focus:bg-surface'
 
 export default function Inquiry() {
   const { addLead } = useData()
@@ -356,7 +356,7 @@ export default function Inquiry() {
                     <button
                       type="submit"
                       disabled={state === 'sending'}
-                      className="w-full bg-ink px-10 py-4 text-sm text-surface transition-colors duration-500 hover:bg-accent-deep disabled:opacity-60 sm:w-auto"
+                      className="w-full bg-ink px-10 py-4 text-sm text-surface transition-colors duration-300 hover:bg-accent-deep disabled:opacity-60 sm:w-auto"
                     >
                       <span className="flex items-center justify-center gap-3">
                         {state === 'sending' && (
@@ -371,7 +371,7 @@ export default function Inquiry() {
                       <a
                         href={`tel:${hall.phoneHref}`}
                         dir="ltr"
-                        className="num inline-block border-b border-accent/40 pb-px text-ink transition-colors hover:border-accent"
+                        className="num inline-block border-b border-accent/40 pb-px text-ink transition-colors duration-300 hover:border-accent"
                       >
                         {hall.phone}
                       </a>

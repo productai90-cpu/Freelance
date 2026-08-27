@@ -109,7 +109,7 @@ export default function AdminShell({ route }) {
               </span>
               <a
                 href="#/"
-                className="rounded-full border border-line px-2.5 py-1 text-[10px] text-muted transition-colors hover:text-ink"
+                className="rounded-full border border-line px-2.5 py-1 text-[10px] text-muted transition-colors duration-300 hover:text-ink"
               >
                 سایت
               </a>
@@ -118,7 +118,7 @@ export default function AdminShell({ route }) {
                   await signOut()
                   setUnlocked(false)
                 }}
-                className="rounded-full border border-line px-2.5 py-1 text-[10px] text-muted transition-colors hover:text-ink"
+                className="rounded-full border border-line px-2.5 py-1 text-[10px] text-muted transition-colors duration-300 hover:text-ink"
               >
                 خروج
               </button>

@@ -51,7 +51,7 @@ export default function BookingDetail({ id }) {
     <div className="px-5 pt-5">
       <button
         onClick={() => navigate('/admin')}
-        className="mb-4 flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-ink"
+        className="mb-4 flex items-center gap-1.5 text-xs text-muted transition-colors duration-300 hover:text-ink"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className="h-3.5 w-3.5">
           <path d="m9 6 6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -77,7 +77,7 @@ export default function BookingDetail({ id }) {
         <a
           href={`tel:${booking.phone}`}
           dir="ltr"
-          className="num mt-4 inline-flex flex-row-reverse items-center gap-2 rounded-lg border border-line px-4 py-2 text-left text-sm text-ink transition-colors hover:border-accent"
+          className="num mt-4 inline-flex flex-row-reverse items-center gap-2 rounded-lg border border-line px-4 py-2 text-left text-sm text-ink transition-colors duration-300 hover:border-accent"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" className="h-4 w-4">
             <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1Z" />
@@ -129,7 +129,7 @@ export default function BookingDetail({ id }) {
       <div className="mt-5 space-y-2.5">
         <button
           onClick={() => notify(`یادآوری برای ${booking.client} ارسال شد`)}
-          className="w-full rounded-lg bg-ink py-3.5 text-sm text-surface transition-opacity hover:opacity-90"
+          className="w-full rounded-lg bg-ink py-3.5 text-sm text-surface transition-opacity duration-300 hover:opacity-90"
         >
           ارسال یادآوری
         </button>
@@ -140,7 +140,7 @@ export default function BookingDetail({ id }) {
               updateBooking(booking.id, { status: 'booked' })
               notify('رزرو قطعی شد')
             }}
-            className="w-full rounded-lg border border-accent py-3.5 text-sm text-ink transition-colors hover:bg-accent hover:text-surface"
+            className="w-full rounded-lg border border-accent py-3.5 text-sm text-ink transition-colors duration-300 hover:bg-accent hover:text-surface"
           >
             قطعی کردن رزرو
           </button>

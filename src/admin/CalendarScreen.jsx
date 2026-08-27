@@ -12,8 +12,20 @@ import { MONTHS, WEEKDAYS_SHORT, addMonths, formatLong, monthGrid, today } from 
 
 const STATUS_STYLE = {
   free: { tint: 'transparent', dot: null, text: 'text-ink' },
-  tentative: { tint: 'color-mix(in srgb, var(--color-tentative) 16%, transparent)', dot: 'bg-tentative', text: 'text-ink' },
-  booked: { tint: 'color-mix(in srgb, var(--color-booked) 16%, transparent)', dot: 'bg-booked', text: 'text-ink' },
+  /* 16% read as "very slightly off-white" next to a free day — a
+     manager glancing at the month could not tell a taken date from an
+     empty one, which is the single thing this screen exists to say.
+     A booked day now carries weight, a tentative one sits between. */
+  tentative: {
+    tint: 'color-mix(in srgb, var(--color-tentative) 34%, transparent)',
+    dot: 'bg-tentative',
+    text: 'text-ink font-medium',
+  },
+  booked: {
+    tint: 'color-mix(in srgb, var(--color-booked) 46%, transparent)',
+    dot: 'bg-booked',
+    text: 'text-ink font-medium',
+  },
 }
 
 export default function CalendarScreen() {
@@ -50,7 +62,7 @@ export default function CalendarScreen() {
         <button
           onClick={() => go(-1)}
           aria-label="ماه قبل"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted transition-colors hover:text-ink"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted transition-colors duration-300 hover:text-ink"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className="h-4 w-4">
             <path d="m9 6 6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -66,7 +78,7 @@ export default function CalendarScreen() {
         <button
           onClick={() => go(1)}
           aria-label="ماه بعد"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted transition-colors hover:text-ink"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted transition-colors duration-300 hover:text-ink"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className="h-4 w-4">
             <path d="m15 6-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -116,7 +128,7 @@ export default function CalendarScreen() {
                 <button
                   key={c.key}
                   onClick={() => setSelected(isSel ? null : c)}
-                  className={`relative flex aspect-square flex-col items-center justify-center rounded-lg border transition-all duration-200 ${
+                  className={`relative flex aspect-square flex-col items-center justify-center rounded-lg border transition-all duration-300 ${
                     isSel ? 'border-accent' : 'border-transparent'
                   } ${c.isPast ? 'opacity-40' : ''}`}
                   style={{ background: st.tint }}
@@ -168,7 +180,7 @@ export default function CalendarScreen() {
 
                 <button
                   onClick={() => navigate(`/admin/booking/${selectedBooking.id}`)}
-                  className="mt-4 w-full rounded-lg bg-ink py-3 text-sm text-surface transition-opacity hover:opacity-90"
+                  className="mt-4 w-full rounded-lg bg-ink py-3 text-sm text-surface transition-opacity duration-300 hover:opacity-90"
                 >
                   مشاهدهٔ جزئیات رزرو
                 </button>

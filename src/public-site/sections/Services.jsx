@@ -85,7 +85,7 @@ function ServiceCell({ s, index, reduce }) {
           reduce={reduce}
           trigger={shown ? 'now' : 'hold'}
           className={`h-12 w-12 text-ink transition-[transform,color] duration-300 ${EASE_CSS} group-hover:scale-[1.08] group-hover:text-accent-deep ${
-            DECORATIVE.has(s.icon) ? 'group-hover:rotate-3 group-hover:duration-[400ms]' : ''
+            DECORATIVE.has(s.icon) ? 'group-hover:rotate-3 group-hover:duration-300' : ''
           }`}
         />
 

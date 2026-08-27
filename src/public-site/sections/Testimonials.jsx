@@ -69,7 +69,7 @@ function QuoteCard({ item, index, reduce }) {
     <Reveal shown={shown} delay={step} className="h-full">
       <figure
         ref={ref}
-        className="group flex h-full flex-col border border-line bg-surface shadow-soft transition-[box-shadow,transform] duration-500 ease-[cubic-bezier(.22,.61,.36,1)] hover:-translate-y-1 hover:shadow-lift"
+        className="group flex h-full flex-col border border-line bg-surface shadow-soft transition-[box-shadow,transform] duration-300 ease-[cubic-bezier(.22,.61,.36,1)] hover:-translate-y-1 hover:shadow-lift"
       >
         <div className="relative aspect-[4/5] overflow-hidden bg-line/25">
           <img
@@ -77,7 +77,7 @@ function QuoteCard({ item, index, reduce }) {
             alt={item.alt}
             loading="lazy"
             decoding="async"
-            className="photo-cool h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.04]"
+            className="photo-cool h-full w-full object-cover transition-transform duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.04]"
           />
           <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface/55 to-transparent" />
         </div>

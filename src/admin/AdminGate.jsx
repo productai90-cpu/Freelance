@@ -118,7 +118,7 @@ export default function AdminGate({ onUnlock }) {
   }
 
   const field =
-    'w-full rounded-md border border-line bg-surface px-4 py-3 text-ink outline-none transition-colors placeholder:text-muted/45 focus:border-accent'
+    'w-full rounded-md border border-line bg-surface px-4 py-3 text-ink outline-none transition-colors duration-300 placeholder:text-muted/45 focus:border-accent'
 
   return (
     <div className="flex min-h-[100svh] items-center justify-center bg-base px-6">
@@ -183,7 +183,7 @@ export default function AdminGate({ onUnlock }) {
 
           <a
             href="#/"
-            className="mt-6 block text-center text-xs text-muted/70 transition-colors hover:text-accent"
+            className="mt-6 block text-center text-xs text-muted/70 transition-colors duration-300 hover:text-accent"
           >
             بازگشت به سایت
           </a>

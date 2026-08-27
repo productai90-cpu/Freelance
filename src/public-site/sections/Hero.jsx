@@ -183,7 +183,7 @@ export default function Hero({ variant = 'photo' }) {
             className="group relative overflow-hidden border border-surface/60 px-9 py-3.5 text-sm text-surface transition-colors duration-300 hover:border-surface hover:text-ink"
           >
             {/* Fill wipes in from the right — RTL-correct direction */}
-            <span className="absolute inset-0 origin-right scale-x-0 bg-surface transition-transform duration-500 ease-[cubic-bezier(.65,0,.35,1)] group-hover:scale-x-100" />
+            <span className="absolute inset-0 origin-right scale-x-0 bg-surface transition-transform duration-300 ease-[cubic-bezier(.65,0,.35,1)] group-hover:scale-x-100" />
             <span className="relative">استعلام تاریخ و رزرو</span>
           </a>
 
