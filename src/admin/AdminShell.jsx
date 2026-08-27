@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { navigate, segments } from '../lib/router.js'
 import { useData } from '../store/DataContext.jsx'
@@ -7,6 +7,7 @@ import CalendarScreen from './CalendarScreen.jsx'
 import LeadsInbox from './LeadsInbox.jsx'
 import BookingDetail from './BookingDetail.jsx'
 import BookingsList from './BookingsList.jsx'
+import AdminGate, { hasSession, signOut } from './AdminGate.jsx'
 
 /* ============================================================
    MANAGER BACKEND — mobile-first.
@@ -54,12 +55,16 @@ export default function AdminShell({ route }) {
   const parts = segments(route) // ['admin', ...]
   const sub = parts[1]
   const { newLeadCount, toast, resetDemo, ensureSeeded } = useData()
+  const [unlocked, setUnlocked] = useState(hasSession)
 
   // Demo data lives in a dynamically-imported module so it never
-  // reaches the public bundle. Pull it in now that we're in admin.
+  // reaches the public bundle. Seed only AFTER unlocking, so a
+  // visitor who never signs in never pulls the bookings down.
   useEffect(() => {
-    ensureSeeded()
-  }, [ensureSeeded])
+    if (unlocked) ensureSeeded()
+  }, [ensureSeeded, unlocked])
+
+  if (!unlocked) return <AdminGate onUnlock={() => setUnlocked(true)} />
 
   const screen =
     sub === 'leads'
@@ -94,6 +99,15 @@ export default function AdminShell({ route }) {
               >
                 سایت
               </a>
+              <button
+                onClick={() => {
+                  signOut()
+                  setUnlocked(false)
+                }}
+                className="rounded-full border border-line px-2.5 py-1 text-[10px] text-muted transition-colors hover:text-ink"
+              >
+                خروج
+              </button>
             </div>
           </div>
         </header>

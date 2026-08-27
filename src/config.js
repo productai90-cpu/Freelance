@@ -47,3 +47,10 @@ export const FORM_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID'
 
 export const isFormLive =
   FORM_ENDPOINT.startsWith('https://') && !FORM_ENDPOINT.includes('YOUR_FORM_ID')
+
+/* Manager panel credentials are NOT here on purpose.
+
+   config.js is imported by the public site for `hall`, so anything
+   exported from it lands in the bundle every visitor downloads. The
+   login lives in src/admin/credentials.js instead, which only the
+   lazy-loaded admin chunk pulls in. */
