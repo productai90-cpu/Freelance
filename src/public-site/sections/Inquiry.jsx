@@ -201,6 +201,9 @@ export default function Inquiry() {
 
         <Reveal delay={0.1}>
           <div
+            /* Where an anchor scroll to #inquiry should actually land.
+               The heading above is context; the form is the errand. */
+            data-scroll-anchor
             className="mx-auto mt-14 max-w-2xl sm:mt-20"
             style={
               holdHeight && state === 'done'
