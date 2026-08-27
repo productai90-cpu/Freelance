@@ -18,7 +18,7 @@ const relative = (ts) => {
 
 const BADGE = {
   new: { label: 'جدید', cls: 'bg-booked/12 text-booked border-booked/30' },
-  contacted: { label: 'تماس گرفته شد', cls: 'bg-tentative/12 text-brass-deep border-brass/30' },
+  contacted: { label: 'تماس گرفته شد', cls: 'bg-tentative/12 text-accent-deep border-accent/30' },
   converted: { label: 'تبدیل شد', cls: 'bg-free/12 text-free border-free/30' },
 }
 
@@ -54,7 +54,7 @@ export default function LeadsInbox() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ duration: 0.26, ease: [0.22, 0.61, 0.36, 1] }}
-                className={`rounded-xl border border-vein bg-ivory p-4 ${done ? 'opacity-60' : ''}`}
+                className={`rounded-xl border border-line bg-surface p-4 ${done ? 'opacity-60' : ''}`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -82,7 +82,7 @@ export default function LeadsInbox() {
                 </dl>
 
                 {lead.message && (
-                  <p className="mt-3 border-r-2 border-vein pr-3 text-xs leading-relaxed text-muted">
+                  <p className="mt-3 border-r-2 border-line pr-3 text-xs leading-relaxed text-muted">
                     {lead.message}
                   </p>
                 )}
@@ -91,14 +91,14 @@ export default function LeadsInbox() {
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => onConvert(lead)}
-                      className="flex-1 rounded-lg bg-ink py-2.5 text-xs text-ivory transition-opacity hover:opacity-90"
+                      className="flex-1 rounded-lg bg-ink py-2.5 text-xs text-surface transition-opacity hover:opacity-90"
                     >
                       تبدیل به رزرو
                     </button>
                     {lead.status === 'new' && (
                       <button
                         onClick={() => markLead(lead.id, 'contacted')}
-                        className="rounded-lg border border-vein px-4 py-2.5 text-xs text-muted transition-colors hover:text-ink"
+                        className="rounded-lg border border-line px-4 py-2.5 text-xs text-muted transition-colors hover:text-ink"
                       >
                         تماس گرفتم
                       </button>

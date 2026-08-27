@@ -12,14 +12,20 @@ export const hall = {
   tagline: 'آغازی که در سنگ می‌ماند',
   heroSub: 'تالاری آرام و مدرن، برای شبی که سال‌ها از آن گفته می‌شود.',
 
-  phone: '۰۲۱ ۸۸ ۷۴ ۲۲ ۱۰',
-  phoneHref: '+982188742210',
-  whatsapp: '+989121234567',
+  // Landline first — it is the number a hall answers during office hours.
+  phone: '۰۱۱ ۵۲۳۸ ۵۶۷۸',
+  phoneHref: '+981152385678',
+  mobile: '۰۹۱۱ ۱۹۱ ۴۴۷۵',
+  mobileHref: '+989111914475',
+
   instagram: 'talar_marmar',
   instagramUrl: 'https://instagram.com/talar_marmar',
-  address: 'تهران، بزرگراه شهید بابایی، بلوار ارغوان، شمارهٔ ۴۸',
-  hours: 'همه‌روزه ۱۰:۰۰ تا ۲۲:۰۰',
-  capacity: '۱۵۰ تا ۶۰۰ نفر',
+  address: 'مازندران، نوشهر، نیرنگ، تالار مرمر',
+  hours: 'همه‌روزه ۱۰ تا ۲۰',
+  capacity: 'تا ۱۲۰۰ نفر',
+
+  // Footer credit
+  credit: { label: 't.me/Rezmajidi', url: 'https://t.me/Rezmajidi' },
 }
 
 /* ============================================================

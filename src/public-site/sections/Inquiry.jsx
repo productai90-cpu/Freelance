@@ -1,55 +1,106 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import Reveal from '../../components/Reveal.jsx'
 import { Container, SectionTitle } from '../../components/Section.jsx'
 import { inquiry } from '../../data/content.js'
+import textureImg from '../../assets/images/texture.webp'
 import { FORM_ENDPOINT, hall, isFormLive } from '../../config.js'
 import { useData } from '../../store/DataContext.jsx'
 import { MONTHS, dateKey, daysIn, formatKeyLong, today, yearOptions } from '../../lib/jalali.js'
 import { toFa } from '../../lib/digits.js'
 
 /* Underlined field — no boxes. Boxes make a luxury page look like a
-   form; a rule that lights up brass on focus does not. */
+   form; a rule that lights up accent on focus does not. */
 function Field({ label, children }) {
   return (
     <label className="group block">
-      <span className="mb-2 block text-sm text-muted transition-colors group-focus-within:text-brass">
-        {label}
-      </span>
+      {label && (
+        <span className="mb-2 block text-sm text-muted transition-colors group-focus-within:text-accent">
+          {label}
+        </span>
+      )}
       {children}
-      <span className="relative mt-1 block h-px w-full bg-vein">
-        <span className="absolute inset-y-0 right-1/2 left-1/2 bg-brass transition-all duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-focus-within:right-0 group-focus-within:left-0" />
+      <span className="relative mt-1 block h-px w-full bg-line">
+        <span className="absolute inset-y-0 right-1/2 left-1/2 bg-accent transition-all duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-focus-within:right-0 group-focus-within:left-0" />
       </span>
     </label>
   )
 }
 
+/* Selects sit on a tinted well with real padding, so the value never
+   touches the edge and the control reads as tappable on a phone. */
+function Select({ value, onChange, children, ariaLabel }) {
+  return (
+    <div className="relative">
+      <select
+        aria-label={ariaLabel}
+        value={value}
+        onChange={onChange}
+        className="w-full cursor-pointer appearance-none rounded-md bg-surface/75 py-3 pe-4 ps-9 text-ink outline-none transition-colors hover:bg-surface focus:bg-surface"
+      >
+        {children}
+      </select>
+      {/* Chevron sits on the inline-end (left in RTL) */}
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        aria-hidden="true"
+        className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+      >
+        <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+  )
+}
+
 const inputCls =
-  'w-full bg-transparent pb-2 text-ink outline-none placeholder:text-muted/50'
-const selectCls =
-  'w-full appearance-none bg-transparent pb-2 text-ink outline-none cursor-pointer'
+  'w-full rounded-md bg-surface/75 px-4 py-3 text-ink outline-none transition-colors placeholder:text-muted/45 hover:bg-surface focus:bg-surface'
 
 export default function Inquiry() {
   const { addLead } = useData()
   const now = today()
 
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    message: '',
-    jy: now.jy,
-    jm: now.jm,
-    jd: now.jd,
-  })
+  const blank = { name: '', phone: '', message: '', jy: now.jy, jm: now.jm, jd: now.jd }
+  const [form, setForm] = useState(blank)
   const [state, setState] = useState('idle') // idle | sending | done | error
   const [errors, setErrors] = useState({})
+  const successRef = useRef(null)
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  const reset = () => {
+    setState('idle')
+    setForm(blank)
+    setErrors({})
+  }
+
+  /* Clicking anywhere outside the confirmation returns to the form,
+     staying in this section rather than jumping the page. */
+  useEffect(() => {
+    if (state !== 'done') return
+    const onDown = (e) => {
+      if (successRef.current && !successRef.current.contains(e.target)) reset()
+    }
+    const onKey = (e) => e.key === 'Escape' && reset()
+    // Defer, so the click that submitted the form doesn't immediately close it
+    const t = setTimeout(() => {
+      document.addEventListener('mousedown', onDown)
+      document.addEventListener('touchstart', onDown)
+      document.addEventListener('keydown', onKey)
+    }, 0)
+    return () => {
+      clearTimeout(t)
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('touchstart', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [state])
 
   const validate = () => {
     const e = {}
     if (!form.name.trim()) e.name = 'نام خود را وارد کنید.'
-    // Accept Persian or Latin digits, 10–11 chars
     const digits = form.phone.replace(/[^\d۰-۹]/g, '')
     if (digits.length < 10) e.phone = 'شمارهٔ تماس معتبر نیست.'
     setErrors(e)
@@ -99,29 +150,38 @@ export default function Inquiry() {
   }
 
   return (
-    <section id="inquiry" className="relative bg-cream py-24 sm:py-32">
-      <Container>
+    <section id="inquiry" className="relative overflow-hidden bg-surface py-24 sm:py-32">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-90"
+        style={{ backgroundImage: `url(${textureImg})`, backgroundSize: '880px' }}
+      />
+      <div className="pointer-events-none absolute inset-0 bg-base/35" />
+      <Container className="relative">
         <SectionTitle eyebrow={inquiry.eyebrow} title={inquiry.title} intro={inquiry.intro} />
 
         <Reveal delay={0.1}>
-          <div className="mx-auto mt-14 max-w-2xl border border-vein bg-ivory p-8 sm:mt-16 sm:p-12">
+          <div className="mx-auto mt-14 max-w-2xl sm:mt-20">
             <AnimatePresence mode="wait">
               {state === 'done' ? (
                 <motion.div
                   key="done"
+                  ref={successRef}
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.99 }}
                   transition={{ duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }}
-                  className="py-8 text-center"
+                  className="border border-success/25 bg-success-lt p-8 py-14 text-center shadow-soft sm:p-12"
+                  role="status"
+                  aria-live="polite"
                 >
-                  {/* Brass check, drawn */}
+                  {/* Semantic green — success, and only success */}
                   <svg
                     viewBox="0 0 48 48"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="1"
+                    strokeWidth="1.25"
                     strokeLinecap="round"
-                    className="mx-auto h-14 w-14 text-brass"
+                    className="mx-auto h-14 w-14 text-success"
                   >
                     <motion.circle
                       cx="24"
@@ -146,15 +206,9 @@ export default function Inquiry() {
                     همکاران ما در کمتر از ۲۴ ساعت با شما تماس می‌گیرند.
                   </p>
 
-                  <button
-                    onClick={() => {
-                      setState('idle')
-                      setForm({ name: '', phone: '', message: '', jy: now.jy, jm: now.jm, jd: now.jd })
-                    }}
-                    className="mt-8 border-b border-brass/50 pb-0.5 text-sm text-muted transition-colors hover:text-ink"
-                  >
-                    ثبت استعلام دیگر
-                  </button>
+                  <p className="mt-8 text-xs text-muted/70">
+                    برای بازگشت، بیرون از این کادر کلیک کنید.
+                  </p>
                 </motion.div>
               ) : (
                 <motion.form
@@ -164,7 +218,7 @@ export default function Inquiry() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-8"
+                  className="space-y-8 border border-line bg-surface p-8 shadow-soft sm:p-12"
                   noValidate
                 >
                   {/* Honeypot — a widely-shared public link attracts bots,
@@ -189,61 +243,50 @@ export default function Inquiry() {
                           autoComplete="name"
                         />
                       </Field>
-                      {errors.name && (
-                        <p className="mt-2 text-xs text-booked">{errors.name}</p>
-                      )}
+                      {errors.name && <p className="mt-2 text-xs text-danger">{errors.name}</p>}
                     </div>
 
                     <div>
                       <Field label="شمارهٔ تماس">
                         <input
-                          className={`${inputCls} num`}
+                          className={`${inputCls} num text-left`}
                           value={form.phone}
                           onChange={set('phone')}
-                          placeholder="۰۹۱۲ ۰۰۰ ۰۰ ۰۰"
+                          placeholder="0911 000 00 00"
                           inputMode="tel"
                           autoComplete="tel"
                           dir="ltr"
-                          style={{ textAlign: 'right' }}
                         />
                       </Field>
-                      {errors.phone && (
-                        <p className="mt-2 text-xs text-booked">{errors.phone}</p>
-                      )}
+                      {errors.phone && <p className="mt-2 text-xs text-danger">{errors.phone}</p>}
                     </div>
                   </div>
 
-                  {/* Jalali date picker — three selects, no Gregorian anywhere */}
+                  {/* Jalali date picker — three padded selects, no Gregorian */}
                   <div>
                     <span className="mb-2 block text-sm text-muted">تاریخ مورد نظر</span>
-                    <div className="grid grid-cols-3 gap-4">
-                      <Field label="">
-                        <select className={selectCls} value={form.jd} onChange={set('jd')}>
-                          {daysIn(+form.jy, +form.jm).map((d) => (
-                            <option key={d} value={d}>
-                              {toFa(d)}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                      <Field label="">
-                        <select className={selectCls} value={form.jm} onChange={set('jm')}>
-                          {MONTHS.map((m, idx) => (
-                            <option key={m} value={idx + 1}>
-                              {m}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                      <Field label="">
-                        <select className={selectCls} value={form.jy} onChange={set('jy')}>
-                          {yearOptions(3).map((y) => (
-                            <option key={y} value={y}>
-                              {toFa(y)}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
+                    <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                      <Select value={form.jd} onChange={set('jd')} ariaLabel="روز">
+                        {daysIn(+form.jy, +form.jm).map((d) => (
+                          <option key={d} value={d}>
+                            {toFa(d)}
+                          </option>
+                        ))}
+                      </Select>
+                      <Select value={form.jm} onChange={set('jm')} ariaLabel="ماه">
+                        {MONTHS.map((m, idx) => (
+                          <option key={m} value={idx + 1}>
+                            {m}
+                          </option>
+                        ))}
+                      </Select>
+                      <Select value={form.jy} onChange={set('jy')} ariaLabel="سال">
+                        {yearOptions(3).map((y) => (
+                          <option key={y} value={y}>
+                            {toFa(y)}
+                          </option>
+                        ))}
+                      </Select>
                     </div>
                   </div>
 
@@ -261,12 +304,11 @@ export default function Inquiry() {
                     <button
                       type="submit"
                       disabled={state === 'sending'}
-                      className="group relative w-full overflow-hidden border border-brass px-10 py-4 text-sm text-ink transition-colors duration-300 hover:text-ivory disabled:opacity-60 sm:w-auto"
+                      className="w-full bg-ink px-10 py-4 text-sm text-surface transition-colors duration-500 hover:bg-accent-deep disabled:opacity-60 sm:w-auto"
                     >
-                      <span className="absolute inset-0 origin-right scale-x-0 bg-brass transition-transform duration-500 ease-[cubic-bezier(.65,0,.35,1)] group-hover:scale-x-100 group-disabled:scale-x-0" />
-                      <span className="relative flex items-center justify-center gap-3">
+                      <span className="flex items-center justify-center gap-3">
                         {state === 'sending' && (
-                          <span className="h-3.5 w-3.5 animate-spin rounded-full border border-brass border-t-transparent" />
+                          <span className="h-3.5 w-3.5 animate-spin rounded-full border border-surface border-t-transparent" />
                         )}
                         {state === 'sending' ? 'در حال ارسال…' : 'ارسال استعلام'}
                       </span>
@@ -276,7 +318,8 @@ export default function Inquiry() {
                       یا مستقیم تماس بگیرید:{' '}
                       <a
                         href={`tel:${hall.phoneHref}`}
-                        className="num border-b border-brass/40 pb-px text-ink transition-colors hover:border-brass"
+                        dir="ltr"
+                        className="num inline-block border-b border-accent/40 pb-px text-ink transition-colors hover:border-accent"
                       >
                         {hall.phone}
                       </a>
@@ -287,10 +330,15 @@ export default function Inquiry() {
                     <motion.p
                       initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="border-r-2 border-booked bg-booked/5 px-4 py-3 text-sm leading-relaxed text-text"
+                      role="alert"
+                      className="border-s-2 border-danger bg-danger-lt py-3 pe-4 ps-4 text-sm leading-relaxed text-ink"
                     >
                       ارسال با خطا مواجه شد. لطفاً با شمارهٔ{' '}
-                      <a href={`tel:${hall.phoneHref}`} className="num text-ink underline">
+                      <a
+                        href={`tel:${hall.phoneHref}`}
+                        dir="ltr"
+                        className="num inline-block text-danger underline"
+                      >
                         {hall.phone}
                       </a>{' '}
                       تماس بگیرید.

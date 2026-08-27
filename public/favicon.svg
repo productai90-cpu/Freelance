@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Marble slab. Purely geometric: at 16px a Persian letterform is
+       illegible, and SVG <text> would depend on whatever font the
+       browser happens to have. The vein carries the brand instead. -->
+  <rect width="64" height="64" rx="10" fill="#2E3236"/>
+  <clipPath id="c">
+    <rect width="64" height="64" rx="10"/>
+  </clipPath>
+  <g clip-path="url(#c)" fill="none" stroke-linecap="round">
+    <path d="M-8 46C10 36 20 28 32 16S52 -2 72 -10" stroke="#C7CDD2" stroke-width="2.4" opacity="0.85"/>
+    <path d="M-8 62C12 52 26 44 38 32S62 12 72 6" stroke="#9AA3AC" stroke-width="1.6" opacity="0.6"/>
+    <path d="M-8 30C6 22 14 16 24 6" stroke="#9AA3AC" stroke-width="1.2" opacity="0.4"/>
+  </g>
+  <rect x="1.25" y="1.25" width="61.5" height="61.5" rx="9" fill="none" stroke="#9AA3AC" stroke-width="1.5" opacity="0.5"/>
+</svg>

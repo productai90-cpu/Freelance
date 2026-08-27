@@ -34,7 +34,7 @@ export default function BookingsList() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: dim ? 0.55 : 1, y: 0 }}
         transition={{ duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
-        className="w-full rounded-xl border border-vein bg-ivory p-4 text-right transition-colors hover:border-brass/50"
+        className="w-full rounded-xl border border-line bg-surface p-4 text-right transition-colors hover:border-accent/50"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -47,7 +47,7 @@ export default function BookingsList() {
           </span>
         </div>
 
-        <div className="mt-3 flex items-center justify-between border-t border-vein pt-3 text-xs">
+        <div className="mt-3 flex items-center justify-between border-t border-line pt-3 text-xs">
           <span className="text-muted">{b.hall}</span>
           {remaining > 0 ? (
             <span className="num text-muted">

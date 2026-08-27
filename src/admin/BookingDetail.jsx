@@ -35,7 +35,7 @@ export default function BookingDetail({ id }) {
         <p className="text-sm text-muted">این رزرو یافت نشد.</p>
         <button
           onClick={() => navigate('/admin')}
-          className="mt-4 border-b border-brass/50 pb-0.5 text-sm text-ink"
+          className="mt-4 border-b border-accent/50 pb-0.5 text-sm text-ink"
         >
           بازگشت به تقویم
         </button>
@@ -60,12 +60,12 @@ export default function BookingDetail({ id }) {
       </button>
 
       {/* — Headline — */}
-      <div className="rounded-xl border border-vein bg-cream/40 p-5">
+      <div className="rounded-xl border border-line bg-cream/40 p-5">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: status.color }} />
           <span className="text-xs text-muted">{status.label}</span>
           {booking.fromLead && (
-            <span className="rounded-full border border-brass/30 px-2 py-0.5 text-[10px] text-brass">
+            <span className="rounded-full border border-accent/30 px-2 py-0.5 text-[10px] text-accent">
               از استعلام سایت
             </span>
           )}
@@ -76,7 +76,7 @@ export default function BookingDetail({ id }) {
 
         <a
           href={`tel:${booking.phone}`}
-          className="num mt-4 inline-flex items-center gap-2 rounded-lg border border-vein px-4 py-2 text-sm text-ink transition-colors hover:border-brass"
+          className="num mt-4 inline-flex items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm text-ink transition-colors hover:border-accent"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" className="h-4 w-4">
             <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1Z" />
@@ -86,9 +86,9 @@ export default function BookingDetail({ id }) {
       </div>
 
       {/* — Financials — */}
-      <div className="mt-5 rounded-xl border border-vein bg-ivory p-5">
+      <div className="mt-5 rounded-xl border border-line bg-surface p-5">
         <p className="eyebrow mb-1">مالی</p>
-        <dl className="divide-y divide-vein">
+        <dl className="divide-y divide-line">
           <Row label="مبلغ قرارداد" value={toman(booking.contract)} />
           <Row label="بیعانهٔ پرداختی" value={toman(booking.deposit)} />
           <Row label="مانده حساب" value={toman(remaining)} emphasis />
@@ -96,9 +96,9 @@ export default function BookingDetail({ id }) {
 
         {/* Payment progress — a hairline, not a chunky bar */}
         <div className="mt-4">
-          <div className="h-1 w-full overflow-hidden rounded-full bg-vein">
+          <div className="h-1 w-full overflow-hidden rounded-full bg-line">
             <motion.div
-              className="h-full rounded-full bg-brass"
+              className="h-full rounded-full bg-accent"
               initial={{ width: 0 }}
               animate={{ width: `${Math.round(paidRatio * 100)}%` }}
               transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
@@ -111,14 +111,14 @@ export default function BookingDetail({ id }) {
       </div>
 
       {/* — Event details — */}
-      <div className="mt-5 rounded-xl border border-vein bg-ivory p-5">
+      <div className="mt-5 rounded-xl border border-line bg-surface p-5">
         <p className="eyebrow mb-1">مراسم</p>
-        <dl className="divide-y divide-vein">
+        <dl className="divide-y divide-line">
           <Row label="سالن" value={booking.hall} />
           <Row label="تعداد مهمان" value={booking.guests ? toFa(booking.guests) : '—'} />
         </dl>
         {booking.note && (
-          <p className="mt-3 border-r-2 border-brass/40 pr-3 text-xs leading-relaxed text-muted">
+          <p className="mt-3 border-r-2 border-accent/40 pr-3 text-xs leading-relaxed text-muted">
             {booking.note}
           </p>
         )}
@@ -128,7 +128,7 @@ export default function BookingDetail({ id }) {
       <div className="mt-5 space-y-2.5">
         <button
           onClick={() => notify(`یادآوری برای ${booking.client} ارسال شد`)}
-          className="w-full rounded-lg bg-ink py-3.5 text-sm text-ivory transition-opacity hover:opacity-90"
+          className="w-full rounded-lg bg-ink py-3.5 text-sm text-surface transition-opacity hover:opacity-90"
         >
           ارسال یادآوری
         </button>
@@ -139,7 +139,7 @@ export default function BookingDetail({ id }) {
               updateBooking(booking.id, { status: 'booked' })
               notify('رزرو قطعی شد')
             }}
-            className="w-full rounded-lg border border-brass py-3.5 text-sm text-ink transition-colors hover:bg-brass hover:text-ivory"
+            className="w-full rounded-lg border border-accent py-3.5 text-sm text-ink transition-colors hover:bg-accent hover:text-surface"
           >
             قطعی کردن رزرو
           </button>

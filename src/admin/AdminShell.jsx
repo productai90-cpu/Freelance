@@ -73,24 +73,24 @@ export default function AdminShell({ route }) {
   const activeTab = screen === 'detail' ? 'bookings' : screen
 
   return (
-    <div className="min-h-[100svh] bg-stone/40 lg:flex lg:items-center lg:justify-center lg:py-10">
+    <div className="min-h-[100svh] bg-base lg:flex lg:items-center lg:justify-center lg:py-10">
       {/* Phone-width column. On desktop it gains a frame so the demo
           reads unmistakably as a phone screen. */}
-      <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[430px] flex-col bg-ivory lg:min-h-0 lg:h-[860px] lg:rounded-[2.25rem] lg:border-8 lg:border-ink lg:shadow-2xl lg:overflow-hidden">
+      <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[430px] flex-col bg-surface lg:min-h-0 lg:h-[860px] lg:rounded-[2.25rem] lg:border-8 lg:border-ink lg:shadow-2xl lg:overflow-hidden">
         {/* — Header — */}
-        <header className="sticky top-0 z-20 border-b border-vein bg-ivory/95 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur">
           <div className="flex items-center justify-between px-5 pb-3 pt-5">
             <div>
               <p className="font-display text-lg font-light text-ink">{hall.name}</p>
               <p className="text-[11px] text-muted">پنل مدیریت</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="rounded-full border border-brass/40 px-2.5 py-1 text-[10px] text-brass">
+              <span className="rounded-full border border-accent/40 px-2.5 py-1 text-[10px] text-accent">
                 نسخهٔ نمایشی
               </span>
               <a
                 href="#/"
-                className="rounded-full border border-vein px-2.5 py-1 text-[10px] text-muted transition-colors hover:text-ink"
+                className="rounded-full border border-line px-2.5 py-1 text-[10px] text-muted transition-colors hover:text-ink"
               >
                 سایت
               </a>
@@ -126,7 +126,7 @@ export default function AdminShell({ route }) {
         </div>
 
         {/* — Bottom tabs: thumb-reachable, app-like, not a sidebar — */}
-        <nav className="absolute inset-x-0 bottom-0 z-20 border-t border-vein bg-ivory/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+        <nav className="absolute inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
           <div className="flex">
             {TABS.map((t) => {
               const on = activeTab === t.key
@@ -140,14 +140,14 @@ export default function AdminShell({ route }) {
                   {on && (
                     <motion.span
                       layoutId="tab-indicator"
-                      className="absolute inset-x-6 top-0 h-px bg-brass"
+                      className="absolute inset-x-6 top-0 h-px bg-accent"
                       transition={{ duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
                     />
                   )}
                   <span className="relative">
-                    <Icon className={`h-5 w-5 ${on ? 'text-brass' : 'text-muted'}`} />
+                    <Icon className={`h-5 w-5 ${on ? 'text-accent' : 'text-muted'}`} />
                     {t.key === 'leads' && newLeadCount > 0 && (
-                      <span className="absolute -left-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-booked px-1 text-[9px] text-ivory">
+                      <span className="absolute -left-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-booked px-1 text-[9px] text-surface">
                         {newLeadCount}
                       </span>
                     )}
@@ -168,7 +168,7 @@ export default function AdminShell({ route }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
               transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-              className="pointer-events-none absolute inset-x-5 bottom-24 z-30 rounded-lg bg-ink px-4 py-3 text-center text-sm text-ivory shadow-xl"
+              className="pointer-events-none absolute inset-x-5 bottom-24 z-30 rounded-lg bg-ink px-4 py-3 text-center text-sm text-surface shadow-xl"
             >
               {toast.message}
             </motion.div>

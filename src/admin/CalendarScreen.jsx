@@ -50,7 +50,7 @@ export default function CalendarScreen() {
         <button
           onClick={() => go(-1)}
           aria-label="ماه قبل"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-vein text-muted transition-colors hover:text-ink"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted transition-colors hover:text-ink"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className="h-4 w-4">
             <path d="m9 6 6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -66,7 +66,7 @@ export default function CalendarScreen() {
         <button
           onClick={() => go(1)}
           aria-label="ماه بعد"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-vein text-muted transition-colors hover:text-ink"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted transition-colors hover:text-ink"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className="h-4 w-4">
             <path d="m15 6-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -117,13 +117,13 @@ export default function CalendarScreen() {
                   key={c.key}
                   onClick={() => setSelected(isSel ? null : c)}
                   className={`relative flex aspect-square flex-col items-center justify-center rounded-lg border transition-all duration-200 ${
-                    isSel ? 'border-brass' : 'border-transparent'
+                    isSel ? 'border-accent' : 'border-transparent'
                   } ${c.isPast ? 'opacity-40' : ''}`}
                   style={{ background: st.tint }}
                 >
                   <span
                     className={`num text-sm ${
-                      c.isToday ? 'font-medium text-brass' : st.text
+                      c.isToday ? 'font-medium text-accent' : st.text
                     }`}
                   >
                     {toFa(c.jd)}
@@ -132,7 +132,7 @@ export default function CalendarScreen() {
                   {st.dot && <span className={`mt-1 h-1 w-1 rounded-full ${st.dot}`} />}
 
                   {c.isToday && (
-                    <span className="absolute inset-x-3 bottom-1 h-px bg-brass/50" />
+                    <span className="absolute inset-x-3 bottom-1 h-px bg-accent/50" />
                   )}
                 </button>
               )
@@ -150,7 +150,7 @@ export default function CalendarScreen() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.22 }}
-            className="mt-5 rounded-xl border border-vein bg-cream/50 p-4"
+            className="mt-5 rounded-xl border border-line bg-cream/50 p-4"
           >
             <p className="text-sm text-muted">{formatLong(selected.jy, selected.jm, selected.jd)}</p>
 
@@ -168,7 +168,7 @@ export default function CalendarScreen() {
 
                 <button
                   onClick={() => navigate(`/admin/booking/${selectedBooking.id}`)}
-                  className="mt-4 w-full rounded-lg bg-ink py-3 text-sm text-ivory transition-opacity hover:opacity-90"
+                  className="mt-4 w-full rounded-lg bg-ink py-3 text-sm text-surface transition-opacity hover:opacity-90"
                 >
                   مشاهدهٔ جزئیات رزرو
                 </button>

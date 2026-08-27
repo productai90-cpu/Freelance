@@ -9,3 +9,17 @@ dist
 Talar.txt
 تالار-نکات-مذاکره.md
 *نکات*.md
+
+# Source photography, already converted. The .webp files the site
+# actually loads live in src/assets/images/ and weigh ~1MB; these are
+# the 14MB of originals they came from.
+New images/
+
+# Working documents, not site code — the blank menu form sent to the
+# hall owner, and the reusable templates for building the next site.
+MENU.md
+_TEMPLATE-*.md
+
+# Generated output. menuPdf.js builds the menu in the browser at
+# request time; nothing in the repo needs to ship a copy.
+*.pdf

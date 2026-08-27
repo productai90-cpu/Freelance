@@ -16,8 +16,8 @@ export default function App() {
       {isAdmin ? (
         <Suspense
           fallback={
-            <div className="flex min-h-[100svh] items-center justify-center bg-ivory">
-              <span className="h-5 w-5 animate-spin rounded-full border border-brass border-t-transparent" />
+            <div className="flex min-h-[100svh] items-center justify-center bg-surface">
+              <span className="h-5 w-5 animate-spin rounded-full border border-accent border-t-transparent" />
             </div>
           }
         >
