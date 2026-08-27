@@ -76,7 +76,8 @@ export default function BookingDetail({ id }) {
 
         <a
           href={`tel:${booking.phone}`}
-          className="num mt-4 inline-flex items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm text-ink transition-colors hover:border-accent"
+          dir="ltr"
+          className="num mt-4 inline-flex flex-row-reverse items-center gap-2 rounded-lg border border-line px-4 py-2 text-left text-sm text-ink transition-colors hover:border-accent"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" className="h-4 w-4">
             <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1Z" />

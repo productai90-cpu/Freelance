@@ -70,6 +70,34 @@ create index if not exists bookings_event_date_idx on public.bookings (event_dat
 
 
 -- ─────────────────────────────────────────────
+--  TABLE GRANTS
+--
+--  Postgres checks TWO separate things, and both must pass:
+--
+--    1. GRANT — does this role may touch the table at all?
+--    2. RLS   — which rows, and under what conditions?
+--
+--  Policies alone are not enough. Without the grants below every
+--  anonymous insert is refused with 42501 "permission denied for
+--  table leads" before any policy is even consulted.
+--
+--  Granting narrowly is also a second layer of defence: even if an
+--  RLS policy were mis-written later, anon still has no SELECT on
+--  leads and no rights whatsoever on bookings.
+-- ─────────────────────────────────────────────
+grant usage on schema public to anon, authenticated;
+
+-- Start from nothing, then open one door.
+revoke all on public.leads    from anon;
+revoke all on public.bookings from anon;
+
+grant insert on public.leads to anon;   -- post the letter, cannot read the box
+
+grant select, insert, update, delete on public.leads    to authenticated;
+grant select, insert, update, delete on public.bookings to authenticated;
+
+
+-- ─────────────────────────────────────────────
 --  ROW LEVEL SECURITY
 --
 --  Enabling RLS with no policy denies everything. Each policy below
@@ -123,3 +151,9 @@ create policy "staff may read and edit bookings"
 -- select tablename, rowsecurity
 --   from pg_tables
 --  where schemaname = 'public' and tablename in ('leads', 'bookings');
+--
+--  And that anon holds exactly one privilege — INSERT on leads:
+--
+-- select table_name, privilege_type
+--   from information_schema.role_table_grants
+--  where grantee = 'anon' and table_schema = 'public';

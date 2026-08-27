@@ -55,7 +55,7 @@ function ListIcon(p) {
 export default function AdminShell({ route }) {
   const parts = segments(route) // ['admin', ...]
   const sub = parts[1]
-  const { newLeadCount, toast, resetDemo, ensureSeeded } = useData()
+  const { newLeadCount, toast, ensureSeeded } = useData()
   const [unlocked, setUnlocked] = useState(hasSession)
 
   /* Live mode: Supabase restores a session asynchronously, so a
@@ -142,15 +142,6 @@ export default function AdminShell({ route }) {
               {screen === 'detail' && <BookingDetail id={parts[2]} />}
             </motion.div>
           </AnimatePresence>
-
-          <div className="px-5 pt-8">
-            <button
-              onClick={resetDemo}
-              className="w-full py-3 text-center text-xs text-muted/70 transition-colors hover:text-muted"
-            >
-              بازنشانی دمو
-            </button>
-          </div>
         </div>
 
         {/* — Bottom tabs: thumb-reachable, app-like, not a sidebar — */}

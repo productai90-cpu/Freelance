@@ -84,25 +84,53 @@ export default function Inquiry() {
   }
 
   /* Clicking anywhere outside the confirmation returns to the form,
-     staying in this section rather than jumping the page. */
+     staying in this section rather than jumping the page.
+
+     Two things were wrong here on a phone.
+
+     `touchstart` fires the moment a finger lands — including the
+     finger that is about to SCROLL. So the one gesture a reader makes
+     to look at the message was the gesture that dismissed it. `click`
+     does not fire on a scroll, only on a real tap, so it is the right
+     event on both pointer types.
+
+     And the grace period was 0ms. Any stray tap in the same beat as
+     the submit killed the message before it was read. A second is
+     long enough for the tick to finish drawing. */
   useEffect(() => {
     if (state !== 'done') return
-    const onDown = (e) => {
+    const onClick = (e) => {
       if (successRef.current && !successRef.current.contains(e.target)) reset()
     }
     const onKey = (e) => e.key === 'Escape' && reset()
-    // Defer, so the click that submitted the form doesn't immediately close it
+
     const t = setTimeout(() => {
-      document.addEventListener('mousedown', onDown)
-      document.addEventListener('touchstart', onDown)
+      document.addEventListener('click', onClick)
       document.addEventListener('keydown', onKey)
-    }, 0)
+    }, 1000)
+
     return () => {
       clearTimeout(t)
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('touchstart', onDown)
+      document.removeEventListener('click', onClick)
       document.removeEventListener('keydown', onKey)
     }
+  }, [state])
+
+  /* The confirmation is far shorter than the form it replaces, so the
+     section collapses under the reader and what they were looking at
+     slides away — it reads as the page jumping down on submit. Bring
+     the message to them instead. */
+  useEffect(() => {
+    if (state !== 'done' || !successRef.current) return
+    const id = requestAnimationFrame(() => {
+      successRef.current?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? 'auto'
+          : 'smooth',
+        block: 'center',
+      })
+    })
+    return () => cancelAnimationFrame(id)
   }, [state])
 
   const validate = () => {

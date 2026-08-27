@@ -74,7 +74,15 @@ export default function LeadsInbox() {
                   <div className="flex gap-2">
                     <dt className="text-muted">تماس:</dt>
                     <dd>
-                      <a href={`tel:${lead.phone}`} className="num text-ink underline-offset-4 hover:underline">
+                      {/* dir=ltr: a phone number is a Latin-digit run.
+                          Left to the page's RTL context, bidi reorders
+                          the groups and a number typed with spaces or a
+                          leading + comes out scrambled. */}
+                      <a
+                        href={`tel:${lead.phone}`}
+                        dir="ltr"
+                        className="num block text-left text-ink underline-offset-4 hover:underline"
+                      >
                         {lead.phone}
                       </a>
                     </dd>
