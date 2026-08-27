@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Nav from './sections/Nav.jsx'
 import Hero from './sections/Hero.jsx'
 import About from './sections/About.jsx'
@@ -10,6 +10,7 @@ import Testimonials from './sections/Testimonials.jsx'
 import Inquiry from './sections/Inquiry.jsx'
 import Footer from './sections/Footer.jsx'
 import ScrollProgress from '../components/ScrollProgress.jsx'
+import { installAnchorScroll } from '../lib/scrollToSection.js'
 
 /* PUBLIC SITE — branding and lead capture only.
 
@@ -23,6 +24,10 @@ export default function PublicSite() {
      owns the control and Hero owns the render. */
   const [heroVariant, setHeroVariant] = useState('photo')
   const toggleHero = () => setHeroVariant((v) => (v === 'beams' ? 'photo' : 'beams'))
+
+  // Lazy images shift the page while a long anchor scroll is running,
+  // so the destination has to be re-measured on the way down.
+  useEffect(installAnchorScroll, [])
 
   return (
     <div id="top">
