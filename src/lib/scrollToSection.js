@@ -21,6 +21,24 @@
 const SETTLE_MS = 1400
 const TOLERANCE = 6
 
+/* The menu lightbox pins `body { overflow: hidden }` while it is open,
+   and its call to action both closes the dialog AND links to #inquiry.
+   Closing is a state change with an exit animation on it, so the lock
+   is still in place for a few frames after the click — long enough to
+   swallow the scroll entirely. Wait for the page to be scrollable
+   again, but never longer than the exit takes. */
+const LOCK_WAIT_MS = 700
+
+function whenScrollable(run) {
+  const started = performance.now()
+  const check = () => {
+    const locked = getComputedStyle(document.body).overflow === 'hidden'
+    if (!locked || performance.now() - started > LOCK_WAIT_MS) run()
+    else requestAnimationFrame(check)
+  }
+  check()
+}
+
 export function scrollToId(id) {
   const el = document.getElementById(id)
   if (!el) return false
@@ -34,11 +52,13 @@ export function scrollToId(id) {
 
   const targetY = () => el.getBoundingClientRect().top + window.scrollY - padding
 
-  window.scrollTo({ top: targetY(), behavior: reduce ? 'auto' : 'smooth' })
-  if (reduce) return true
+  if (reduce) {
+    whenScrollable(() => window.scrollTo({ top: targetY(), behavior: 'auto' }))
+    return true
+  }
 
   let raf = 0
-  const started = performance.now()
+  let started = performance.now()
 
   const stop = () => {
     cancelAnimationFrame(raf)
@@ -64,7 +84,11 @@ export function scrollToId(id) {
   window.addEventListener('touchstart', stop, { passive: true })
   window.addEventListener('keydown', stop)
 
-  raf = requestAnimationFrame(tick)
+  whenScrollable(() => {
+    started = performance.now() // the settle window begins at the scroll
+    window.scrollTo({ top: targetY(), behavior: 'smooth' })
+    raf = requestAnimationFrame(tick)
+  })
   return true
 }
 
