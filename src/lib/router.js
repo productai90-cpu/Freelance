@@ -24,9 +24,21 @@ export function useRoute() {
 
   useEffect(() => {
     const onChange = () => {
-      setRoute(getRoute())
-      // A hash change is a page change here — start at the top.
-      window.scrollTo({ top: 0, behavior: 'auto' })
+      const next = getRoute()
+
+      setRoute((prev) => {
+        /* Only a real route change resets the scroll.
+
+           The public site's section links are ordinary anchors —
+           `#about`, `#menu` — and every one of them fires hashchange.
+           This used to scroll to top unconditionally, so each click
+           raced the browser's smooth scroll to the section and the
+           page lurched to the top instead of gliding down. An anchor
+           that is not a route leaves `next` as '/', unchanged, and is
+           now left alone to do its own scrolling. */
+        if (next !== prev) window.scrollTo({ top: 0, behavior: 'auto' })
+        return next
+      })
     }
     window.addEventListener('hashchange', onChange)
     return () => window.removeEventListener('hashchange', onChange)

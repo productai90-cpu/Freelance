@@ -140,6 +140,13 @@
 
   html {
     scroll-behavior: smooth;
+
+    /* The header is fixed, so an anchor target would otherwise land
+       underneath it with its eyebrow and the top of its title hidden.
+       scroll-padding-top offsets every anchor jump by the header's
+       height in one declaration, rather than a scroll-mt on each
+       section that has to be kept in sync by hand. */
+    scroll-padding-top: 5.5rem;
     -webkit-text-size-adjust: 100%;
   }
 

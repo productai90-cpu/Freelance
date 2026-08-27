@@ -1,11 +1,21 @@
+import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useData } from '../store/DataContext.jsx'
 import { navigate } from '../lib/router.js'
 import { formatKeyLong } from '../lib/jalali.js'
 import { toFa } from '../lib/digits.js'
 
-/* Leads arrive here from the public inquiry form. The «تبدیل به رزرو»
-   action is the hinge of the whole product demo. */
+/* Leads arrive here from the public inquiry form.
+
+   An enquiry is either OPEN or SETTLED, and the inbox only shows the
+   open ones. «تبدیل به رزرو» settles it into the calendar, «لغو»
+   settles it away. «تماس گرفتم» settles nothing — it is a marker
+   saying someone has already rung this person, so two staff do not
+   call the same couple and nobody sits waiting on an enquiry that
+   was answered yesterday.
+
+   Settled enquiries drop into a collapsed list underneath. Out of
+   the way, but a cancel is one tap and so is undoing it. */
 
 const relative = (ts) => {
   const mins = Math.floor((Date.now() - ts) / 60000)
@@ -30,8 +40,16 @@ const BADGE = {
 const BTN = 'rounded-lg py-2.5 text-xs transition-colors duration-300'
 const OUTLINE = `${BTN} border px-4`
 
+const OPEN = new Set(['new', 'contacted'])
+
 export default function LeadsInbox() {
   const { leads, convertLead, markLead, notify } = useData()
+  const [showSettled, setShowSettled] = useState(false)
+
+  const [open, settled] = useMemo(
+    () => [leads.filter((l) => OPEN.has(l.status)), leads.filter((l) => !OPEN.has(l.status))],
+    [leads],
+  )
 
   const onConvert = (lead) => {
     const booking = convertLead(lead.id)
@@ -43,13 +61,13 @@ export default function LeadsInbox() {
   return (
     <div className="px-5 pt-5">
       <div className="flex items-baseline justify-between">
-        <h2 className="font-display text-xl font-light text-ink">استعلام‌های دریافتی</h2>
-        <span className="num text-xs text-muted">{toFa(leads.length)} مورد</span>
+        <h2 className="font-display text-xl font-light text-ink">استعلام‌های باز</h2>
+        <span className="num text-xs text-muted">{toFa(open.length)} مورد</span>
       </div>
 
       <div className="mt-5 space-y-3">
         <AnimatePresence initial={false}>
-          {leads.map((lead) => {
+          {(showSettled ? settled : open).map((lead) => {
             const badge = BADGE[lead.status] ?? BADGE.new
             const converted = lead.status === 'converted'
             const archived = lead.status === 'archived'
@@ -152,10 +170,25 @@ export default function LeadsInbox() {
                 {archived && (
                   <div className="mt-4">
                     <button
-                      onClick={() => markLead(lead.id, 'new')}
+                      onClick={() => {
+                        markLead(lead.id, 'new')
+                        notify(`«${lead.name}» به استعلام‌های باز برگشت`)
+                      }}
                       className={`${OUTLINE} w-full border-line text-muted hover:text-ink`}
                     >
-                      بازگرداندن به لیست
+                      بازگرداندن به استعلام‌های باز
+                    </button>
+                  </div>
+                )}
+
+                {/* A converted lead has a booking; take them to it. */}
+                {converted && (
+                  <div className="mt-4">
+                    <button
+                      onClick={() => navigate('/admin/bookings')}
+                      className={`${OUTLINE} w-full border-line text-muted hover:text-ink`}
+                    >
+                      مشاهده در رزروها
                     </button>
                   </div>
                 )}
@@ -164,10 +197,27 @@ export default function LeadsInbox() {
           })}
         </AnimatePresence>
 
-        {leads.length === 0 && (
-          <p className="py-16 text-center text-sm text-muted">هنوز استعلامی ثبت نشده است.</p>
+        {(showSettled ? settled : open).length === 0 && (
+          <p className="py-16 text-center text-sm text-muted">
+            {showSettled
+              ? 'هنوز استعلامی بسته نشده است.'
+              : leads.length === 0
+                ? 'هنوز استعلامی ثبت نشده است.'
+                : 'همهٔ استعلام‌ها رسیدگی شده‌اند.'}
+          </p>
         )}
       </div>
+
+      {settled.length > 0 && (
+        <button
+          onClick={() => setShowSettled((v) => !v)}
+          className="mt-6 w-full rounded-lg border border-line py-3 text-xs text-muted transition-colors duration-300 hover:text-ink"
+        >
+          {showSettled
+            ? 'بازگشت به استعلام‌های باز'
+            : `رسیدگی‌شده‌ها (${toFa(settled.length)})`}
+        </button>
+      )}
     </div>
   )
 }
