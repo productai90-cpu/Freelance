@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { isLive } from '../lib/supabase.js'
+import * as remote from './remote.js'
 
 /* ============================================================
    Shared demo state.
@@ -11,6 +13,17 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
    manager backend mounts. That keeps every booking, amount and status
    label out of the public bundle entirely — the public site is
    branding and lead capture, and its JavaScript reflects that.
+
+   ---- TWO MODES ----
+
+   With Supabase configured (`isLive`), every read and write goes to
+   the database and this local state is just a cache of it, so a lead
+   left on a visitor's phone genuinely arrives on the owner's.
+
+   Without it, everything below runs exactly as before: localStorage,
+   one browser, seed data. That fallback is not a leftover — it means
+   a fresh clone runs with no setup, and a bad key can never take the
+   public site down.
    ============================================================ */
 
 const KEY = 'marmar-demo-v2'
@@ -48,7 +61,12 @@ export function DataProvider({ children }) {
     setTimeout(() => setToast(null), 3200)
   }, [])
 
-  /** Called by the public inquiry form. Always runs, network or not. */
+  /** Called by the public inquiry form. Always runs, network or not.
+
+      The local entry is added FIRST and the insert is not awaited: a
+      couple filling in a form should never watch a spinner because a
+      database is slow, and if the insert fails the lead is still in
+      front of them on screen. The console note is for us, not them. */
   const addLead = useCallback((lead) => {
     const entry = {
       id: `l${Date.now()}`,
@@ -57,6 +75,13 @@ export function DataProvider({ children }) {
       ...lead,
     }
     setState((s) => ({ ...s, leads: [entry, ...s.leads] }))
+
+    if (isLive) {
+      remote.insertLead(entry).catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('[leads] insert failed', err)
+      })
+    }
     return entry
   }, [])
 
@@ -86,6 +111,16 @@ export function DataProvider({ children }) {
         leads: s.leads.map((l) => (l.id === leadId ? { ...l, status: 'converted' } : l)),
       }
     })
+
+    if (isLive && created) {
+      Promise.all([
+        remote.insertBooking(created),
+        remote.updateLeadStatus(leadId, 'converted'),
+      ]).catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('[convert] failed', err)
+      })
+    }
     return created
   }, [])
 
@@ -94,6 +129,12 @@ export function DataProvider({ children }) {
       ...s,
       bookings: s.bookings.map((b) => (b.id === id ? { ...b, ...patch } : b)),
     }))
+    if (isLive) {
+      remote.patchBooking(id, patch).catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('[booking] update failed', err)
+      })
+    }
   }, [])
 
   const markLead = useCallback((id, status) => {
@@ -101,11 +142,33 @@ export function DataProvider({ children }) {
       ...s,
       leads: s.leads.map((l) => (l.id === id ? { ...l, status } : l)),
     }))
+    if (isLive) {
+      remote.updateLeadStatus(id, status).catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('[lead] update failed', err)
+      })
+    }
   }, [])
 
-  /** Called by the admin shell on mount. Loads demo data on first use. */
+  /** Called by the admin shell once the panel unlocks.
+
+      Live: pulls the real tables. Demo: loads the seed. Either way it
+      runs once, and either way the panel has something to show. */
   const ensureSeeded = useCallback(async () => {
     if (state.seeded) return
+
+    if (isLive) {
+      try {
+        const { leads, bookings } = await remote.fetchAll()
+        setState({ leads, bookings, seeded: true })
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('[load] failed', err)
+        notify('اتصال به سرور برقرار نشد.')
+      }
+      return
+    }
+
     const { seedBookings, seedLeads } = await import('../data/mock.js')
     setState((s) =>
       s.seeded
@@ -117,7 +180,7 @@ export function DataProvider({ children }) {
             seeded: true,
           },
     )
-  }, [state.seeded])
+  }, [state.seeded, notify])
 
   const resetDemo = useCallback(async () => {
     const { seedBookings, seedLeads } = await import('../data/mock.js')

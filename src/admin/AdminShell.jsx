@@ -8,6 +8,7 @@ import LeadsInbox from './LeadsInbox.jsx'
 import BookingDetail from './BookingDetail.jsx'
 import BookingsList from './BookingsList.jsx'
 import AdminGate, { hasSession, signOut } from './AdminGate.jsx'
+import { isLive, supabase } from '../lib/supabase.js'
 
 /* ============================================================
    MANAGER BACKEND — mobile-first.
@@ -57,6 +58,19 @@ export default function AdminShell({ route }) {
   const { newLeadCount, toast, resetDemo, ensureSeeded } = useData()
   const [unlocked, setUnlocked] = useState(hasSession)
 
+  /* Live mode: Supabase restores a session asynchronously, so a
+     refresh must ask it rather than assume signed-out. */
+  useEffect(() => {
+    if (!isLive) return
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setUnlocked(true)
+    })
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUnlocked(Boolean(session))
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
   // Demo data lives in a dynamically-imported module so it never
   // reaches the public bundle. Seed only AFTER unlocking, so a
   // visitor who never signs in never pulls the bookings down.
@@ -100,8 +114,8 @@ export default function AdminShell({ route }) {
                 سایت
               </a>
               <button
-                onClick={() => {
-                  signOut()
+                onClick={async () => {
+                  await signOut()
                   setUnlocked(false)
                 }}
                 className="rounded-full border border-line px-2.5 py-1 text-[10px] text-muted transition-colors hover:text-ink"

@@ -27,7 +27,14 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # Supabase keys come from repository secrets. If they are not
+      # set the build still succeeds and the site runs in demo mode,
+      # so a missing secret degrades rather than breaks.
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

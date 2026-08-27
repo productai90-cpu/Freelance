@@ -2,11 +2,21 @@ import { useState } from 'react'
 import { motion } from 'motion/react'
 import { hall } from '../config.js'
 import { adminUser } from './credentials.js'
+import { isLive, supabase } from '../lib/supabase.js'
 
 /* ============================================================
-   LOGIN GATE
+   LOGIN GATE — two modes.
 
-   READ THIS BEFORE TRUSTING IT WITH ANYTHING REAL.
+   LIVE (Supabase configured): a real sign-in. The password goes to
+   Supabase Auth, is verified against a salted hash on their servers,
+   and what comes back is a signed JWT. Row Level Security then keys
+   off that token, so the panel cannot read a single booking without
+   one. This is real security.
+
+   DEMO (no Supabase): the note below applies.
+
+   ------------------------------------------------------------
+   READ THIS BEFORE TRUSTING THE DEMO MODE WITH ANYTHING REAL.
 
    This site is static. There is no server, so there is nothing that
    can check a password in private — the check happens in the browser,
@@ -23,14 +33,17 @@ import { adminUser } from './credentials.js'
    that you need a backend that verifies the password server-side —
    see the note in ./credentials.js.
 
-   The session lives in sessionStorage, not localStorage, so closing
-   the tab signs you out. On a shared phone that is the behaviour you
-   want.
+   In demo mode the session lives in sessionStorage, so closing the
+   tab signs you out — on a shared phone that is what you want. In
+   live mode Supabase owns the session and refreshes its own token.
    ============================================================ */
 
 const SESSION_KEY = 'marmar-admin-session'
 
+/* Live sessions are resolved asynchronously by Supabase, so this
+   only answers for demo mode; AdminShell asks Supabase separately. */
 export const hasSession = () => {
+  if (isLive) return false
   try {
     return sessionStorage.getItem(SESSION_KEY) === 'ok'
   } catch {
@@ -41,7 +54,11 @@ export const hasSession = () => {
   }
 }
 
-export const signOut = () => {
+export const signOut = async () => {
+  if (isLive) {
+    await supabase.auth.signOut()
+    return
+  }
   try {
     sessionStorage.removeItem(SESSION_KEY)
   } catch {
@@ -55,10 +72,29 @@ export default function AdminGate({ onUnlock }) {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
     setBusy(true)
     setError('')
+
+    if (isLive) {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: user.trim(),
+        password: pass,
+      })
+
+      if (authError) {
+        /* Deliberately one message for every failure. Saying "no such
+           user" tells an attacker which addresses exist. */
+        setError('ایمیل یا رمز عبور درست نیست.')
+        setPass('')
+        setBusy(false)
+        return
+      }
+
+      onUnlock()
+      return
+    }
 
     /* A short delay on purpose. Not security — an instant reject makes
        a typo feel like the field is broken, and a beat of "checking"
@@ -106,10 +142,10 @@ export default function AdminGate({ onUnlock }) {
 
           <form onSubmit={submit} className="mt-8 space-y-3">
             <input
-              type="text"
+              type={isLive ? 'email' : 'text'}
               value={user}
               onChange={(e) => setUser(e.target.value)}
-              placeholder="نام کاربری"
+              placeholder={isLive ? 'ایمیل' : 'نام کاربری'}
               autoComplete="username"
               autoCapitalize="none"
               autoCorrect="off"
@@ -153,9 +189,11 @@ export default function AdminGate({ onUnlock }) {
           </a>
         </div>
 
-        <p className="mt-4 text-center text-[11px] leading-relaxed text-muted/70">
-          نسخهٔ نمایشی — ورود در مرورگر بررسی می‌شود، نه روی سرور.
-        </p>
+        {!isLive && (
+          <p className="mt-4 text-center text-[11px] leading-relaxed text-muted/70">
+            نسخهٔ نمایشی — ورود در مرورگر بررسی می‌شود، نه روی سرور.
+          </p>
+        )}
       </motion.div>
     </div>
   )
