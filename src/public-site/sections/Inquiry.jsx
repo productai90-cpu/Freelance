@@ -74,6 +74,8 @@ export default function Inquiry() {
   const [state, setState] = useState('idle') // idle | sending | done | error
   const [errors, setErrors] = useState({})
   const successRef = useRef(null)
+  const formRef = useRef(null)
+  const [holdHeight, setHoldHeight] = useState(null)
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -116,21 +118,24 @@ export default function Inquiry() {
     }
   }, [state])
 
-  /* The confirmation is far shorter than the form it replaces, so the
-     section collapses under the reader and what they were looking at
-     slides away — it reads as the page jumping down on submit. Bring
-     the message to them instead. */
+  /* Hold the section's height across the swap.
+
+     The confirmation is a few hundred pixels shorter than the form it
+     replaces, so the document shrinks the moment it appears. If the
+     reader had scrolled down to reach the submit button — which they
+     had, it is the last control — the browser clamps their scroll
+     position to the new, shorter maximum and lands them on the
+     footer.
+
+     Scrolling the message into view does not fix that: the collapse
+     is the cause, and the scroll only argues with it. Measuring the
+     form and pinning that height while the confirmation shows means
+     nothing moves at all. */
   useEffect(() => {
-    if (state !== 'done' || !successRef.current) return
-    const id = requestAnimationFrame(() => {
-      successRef.current?.scrollIntoView({
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          ? 'auto'
-          : 'smooth',
-        block: 'center',
-      })
-    })
-    return () => cancelAnimationFrame(id)
+    if (state === 'sending' && formRef.current) {
+      setHoldHeight(formRef.current.offsetHeight)
+    }
+    if (state === 'idle') setHoldHeight(null)
   }, [state])
 
   const validate = () => {
@@ -195,7 +200,14 @@ export default function Inquiry() {
         <SectionTitle eyebrow={inquiry.eyebrow} title={inquiry.title} intro={inquiry.intro} />
 
         <Reveal delay={0.1}>
-          <div className="mx-auto mt-14 max-w-2xl sm:mt-20">
+          <div
+            className="mx-auto mt-14 max-w-2xl sm:mt-20"
+            style={
+              holdHeight && state === 'done'
+                ? { minHeight: holdHeight, display: 'flex', alignItems: 'center' }
+                : undefined
+            }
+          >
             <AnimatePresence mode="wait">
               {state === 'done' ? (
                 <motion.div
@@ -205,7 +217,7 @@ export default function Inquiry() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.99 }}
                   transition={{ duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }}
-                  className="border border-success/25 bg-success-lt p-8 py-14 text-center shadow-soft sm:p-12"
+                  className="w-full border border-success/25 bg-success-lt p-8 py-14 text-center shadow-soft sm:p-12"
                   role="status"
                   aria-live="polite"
                 >
@@ -248,6 +260,7 @@ export default function Inquiry() {
               ) : (
                 <motion.form
                   key="form"
+                  ref={formRef}
                   onSubmit={onSubmit}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}

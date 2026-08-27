@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { isLive } from '../lib/supabase.js'
 import * as remote from './remote.js'
 
@@ -30,6 +30,22 @@ const KEY = 'marmar-demo-v2'
 const DataContext = createContext(null)
 
 const load = () => {
+  /* localStorage is the DEMO's store, not a cache of the database.
+
+     Reading it in live mode is what kept the seeded bookings on
+     screen: the saved blob carries `seeded: true` from an earlier
+     demo session, ensureSeeded saw that and returned before it ever
+     reached Supabase. Drop the stale key so the two cannot be
+     confused again. */
+  if (isLive) {
+    try {
+      localStorage.removeItem(KEY)
+    } catch {
+      /* nothing to clear */
+    }
+    return null
+  }
+
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return null
@@ -47,8 +63,10 @@ export function DataProvider({ children }) {
     () => load() ?? { bookings: [], leads: [], seeded: false },
   )
   const [toast, setToast] = useState(null)
+  const fetchedRef = useRef(false)
 
   useEffect(() => {
+    if (isLive) return // the database is the store; nothing to mirror
     try {
       localStorage.setItem(KEY, JSON.stringify(state))
     } catch {
@@ -155,19 +173,24 @@ export function DataProvider({ children }) {
       Live: pulls the real tables. Demo: loads the seed. Either way it
       runs once, and either way the panel has something to show. */
   const ensureSeeded = useCallback(async () => {
-    if (state.seeded) return
-
     if (isLive) {
+      // Guarded by a ref, not by state.seeded: that flag can arrive
+      // already true from a previous demo session.
+      if (fetchedRef.current) return
+      fetchedRef.current = true
       try {
         const { leads, bookings } = await remote.fetchAll()
         setState({ leads, bookings, seeded: true })
       } catch (err) {
+        fetchedRef.current = false // let a retry happen
         // eslint-disable-next-line no-console
         console.error('[load] failed', err)
         notify('اتصال به سرور برقرار نشد.')
       }
       return
     }
+
+    if (state.seeded) return
 
     const { seedBookings, seedLeads } = await import('../data/mock.js')
     setState((s) =>
