@@ -130,8 +130,41 @@ export function scrollToId(id) {
   const stop = () => {
     cancelAnimationFrame(running)
     window.removeEventListener('wheel', stop)
-    window.removeEventListener('touchstart', stop)
+    window.removeEventListener('touchstart', mark)
+    window.removeEventListener('touchmove', drag)
     window.removeEventListener('keydown', stop)
+  }
+
+  /* ---- Contact is not an instruction ----
+
+     This pair replaces what used to be a plain `touchstart -> stop`,
+     and that listener was the entire bug this file kept failing to
+     fix. On a phone, pressing a button and then letting your thumb
+     rest on the glass is not one gesture followed by another — it is
+     just how a thumb behaves. `touchstart` fired, the scroll was
+     abandoned wherever it had got to, and the reader was left in the
+     middle of the page. Land on the glass 350ms after the tap and
+     you stop in the testimonials, one section short of the form,
+     every time.
+
+     Nothing was wrong with the measuring; the flight was being shot
+     down. And it could only ever happen on a phone, because a mouse
+     never touches the screen — which is exactly how it survived
+     three passes that all assumed the arithmetic was at fault.
+
+     So: cancel on MOVEMENT, not on contact. A finger that has
+     travelled past the slop is a reader scrolling, and they win
+     immediately. A finger that is merely down is a reader waiting to
+     see where they land. */
+  const SLOP = 8 // px of travel before it counts as a scroll, not a rest
+
+  let fromY = 0
+  const mark = (e) => {
+    fromY = e.touches[0]?.clientY ?? 0
+  }
+  const drag = (e) => {
+    const y = e.touches[0]?.clientY ?? fromY
+    if (Math.abs(y - fromY) > SLOP) stop()
   }
 
   /* Hold the landing: correct drift until the page stops moving.
@@ -164,13 +197,14 @@ export function scrollToId(id) {
     running = requestAnimationFrame(tick)
   }
 
-  // Passive: these only cancel, they never preventDefault. Being
-  // helpful is not worth fighting the reader's thumb. They stay
+  // Passive: these only ever cancel, they never preventDefault.
+  // Being helpful is not worth fighting the reader's thumb. They stay
   // attached through the settle — a reader who scrolls away during it
-  // has overruled us, and we let go.
+  // has overruled us, and we let go at once.
   const watchForReader = () => {
     window.addEventListener('wheel', stop, { passive: true })
-    window.addEventListener('touchstart', stop, { passive: true })
+    window.addEventListener('touchstart', mark, { passive: true })
+    window.addEventListener('touchmove', drag, { passive: true })
     window.addEventListener('keydown', stop)
   }
 
