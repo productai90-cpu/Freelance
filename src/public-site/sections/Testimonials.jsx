@@ -32,7 +32,7 @@ const EASE = [0.22, 0.61, 0.36, 1]
 function Stars({ rating = 5 }) {
   return (
     <span
-      className="flex items-center gap-1"
+      className="flex shrink-0 items-center gap-1"
       role="img"
       aria-label={`امتیاز ${toFa(rating)} از ${toFa(5)}`}
     >
@@ -55,9 +55,24 @@ function Stars({ rating = 5 }) {
 
 /* Every card is the same width by construction (the track sets it)
    and the same height by `h-full` down the chain: slide → Reveal →
-   figure. The photograph is a fixed ratio and the quote takes the
-   slack, so a two-line quote and a five-line quote still end on the
-   same baseline. */
+   figure. The quote takes the slack, so a two-line quote and a
+   five-line quote still end on the same baseline.
+
+   ---- Why the photograph is an avatar and not a picture ----
+
+   It used to lead the card at 4:5, which on a phone — where the card
+   is nearly the full width — made every testimonial taller than the
+   screen. The section then read as a gallery that happened to have
+   text under it, and the reader had to scroll past a whole screen of
+   photograph to reach the second voice.
+
+   The words are what this section is for. So the photograph drops to
+   the size a name badge would be and sits WITH the name, where a
+   reader already looks for attribution, and the quotation mark
+   becomes what carries the card visually. Same five voices, a third
+   of the height, and nothing about the couples is lost — they were
+   shot from behind, so at any size they were always a mood rather
+   than a face. */
 function QuoteCard({ item, index, reduce }) {
   const [ref, shown] = useReveal()
   // Stagger across a row, not across the whole set: the carousel can
@@ -71,17 +86,6 @@ function QuoteCard({ item, index, reduce }) {
         ref={ref}
         className="group flex h-full flex-col border border-line bg-surface shadow-soft transition-[box-shadow,transform] duration-300 ease-[cubic-bezier(.22,.61,.36,1)] hover:-translate-y-1 hover:shadow-lift"
       >
-        <div className="relative aspect-[4/5] overflow-hidden bg-line/25">
-          <img
-            src={img(item.photo)}
-            alt={item.alt}
-            loading="lazy"
-            decoding="async"
-            className="photo-cool h-full w-full object-cover transition-transform duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.04]"
-          />
-          <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface/55 to-transparent" />
-        </div>
-
         <div className="flex flex-1 flex-col p-6 sm:p-7">
           {/* Oversized, low-contrast quotation mark — the accent, not a badge */}
           <span aria-hidden className="block font-display text-5xl leading-[0.6] text-accent/45">
@@ -90,13 +94,29 @@ function QuoteCard({ item, index, reduce }) {
 
           <blockquote className="mt-4 flex-1 leading-loose text-ink">{item.quote}</blockquote>
 
-          {/* Name reads first; the rating sits opposite it, where a
-              guest book would carry the date — present, not shouted. */}
-          <figcaption className="mt-6 flex items-end justify-between gap-4 border-t border-line pt-5">
-            <div>
-              <p className="text-ink">{item.name}</p>
-              <p className="mt-1 text-sm text-muted">{item.meta}</p>
+          {/* Attribution, as one row: the face, the name and month it
+              belongs to, and the rating opposite — where a guest book
+              would carry the date. The name is the only part allowed
+              to give up width, because it is the only part that can
+              still be read from what remains of it. */}
+          <figcaption className="mt-6 flex items-center gap-3.5 border-t border-line pt-5">
+            <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-line/25 ring-1 ring-line">
+              <img
+                src={img(item.photo)}
+                alt={item.alt}
+                loading="lazy"
+                decoding="async"
+                width="44"
+                height="44"
+                className="photo-cool h-full w-full object-cover transition-transform duration-300 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.06]"
+              />
+            </span>
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-ink">{item.name}</p>
+              <p className="mt-0.5 truncate text-sm text-muted">{item.meta}</p>
             </div>
+
             <Stars rating={item.rating} />
           </figcaption>
         </div>

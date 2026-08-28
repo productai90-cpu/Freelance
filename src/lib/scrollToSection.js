@@ -54,6 +54,46 @@ const duration = (distance) => Math.min(560, 300 + Math.abs(distance) * 0.06)
    few frames — long enough to swallow the scroll entirely. */
 const LOCK_WAIT_MS = 700
 
+/* ---- Landing is not the same as arriving ----
+
+   Re-reading the destination every frame keeps the scroll honest
+   WHILE it runs, but the page is not finished moving when the scroll
+   is. On a phone the hero's call to action is the full length of the
+   site, the animation is capped at 560ms, and whatever changes the
+   height above the form — a display face arriving on
+   `font-display: swap` and reflowing nine headings, a section
+   settling, the address bar collapsing and changing every `vh` —
+   can easily land after that. Growth above the viewport pushes
+   content down while `scrollY` stays where it was, so the reader
+   ends up higher in the page than they were left: on the
+   testimonials, one section short of the form.
+
+   So we hold the landing. After the animation ends the destination
+   is still re-read every frame and any drift is closed at once — an
+   instant correction, because it is the PAGE that moved, not the
+   reader, and the right result is the form sitting still while the
+   content above it settles.
+
+   ---- Knowing when to let go ----
+
+   Not by asking about fonts. `document.fonts.status` reports
+   'loaded' whenever nothing is pending AT THAT MOMENT, which on a
+   fresh page is true before any text has been laid out and any font
+   requested — so a fonts-ready check is answered "yes" long before
+   the fonts are anywhere, and would release the landing on exactly
+   the slow first visit it exists for.
+
+   Watch the target instead. It is the thing we actually care about,
+   it reports every cause at once — fonts, images, reflow, the
+   address bar — and it needs no guess about which of them is in
+   play. Hold while it keeps moving; let go once it has been still
+   for a moment. The floor stops a single late frame from ending it
+   early, the ceiling stops a page that never settles from holding
+   the reader forever. */
+const SETTLE_MIN_MS = 350   // never let go sooner than this
+const SETTLE_QUIET_MS = 400 // ...nor until the target has been still this long
+const SETTLE_MAX_MS = 2500  // ...and never hold longer than this
+
 function whenScrollable(run) {
   const started = performance.now()
   const check = () => {
@@ -87,16 +127,60 @@ export function scrollToId(id) {
 
   cancelAnimationFrame(running)
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    whenScrollable(() => window.scrollTo({ top: targetY(), behavior: 'auto' }))
-    return true
-  }
-
   const stop = () => {
     cancelAnimationFrame(running)
     window.removeEventListener('wheel', stop)
     window.removeEventListener('touchstart', stop)
     window.removeEventListener('keydown', stop)
+  }
+
+  /* Hold the landing: correct drift until the page stops moving.
+     Costs nothing when nothing moves — it is a read and a compare. */
+  const settle = () => {
+    const started = performance.now()
+    let last = targetY()
+    let stillSince = started
+
+    const tick = (now) => {
+      const to = targetY()
+
+      // A pixel of slack throughout. Sub-pixel layout, and the
+      // rounding some browsers apply to scrollY, would otherwise
+      // read as perpetual movement and never let this finish.
+      if (Math.abs(to - last) > 1) {
+        last = to
+        stillSince = now // the page moved under us — keep holding
+      }
+      if (Math.abs(window.scrollY - to) > 1) {
+        window.scrollTo({ top: to, behavior: 'auto' })
+      }
+
+      const elapsed = now - started
+      const settled = now - stillSince >= SETTLE_QUIET_MS && elapsed >= SETTLE_MIN_MS
+      if (settled || elapsed >= SETTLE_MAX_MS) stop()
+      else running = requestAnimationFrame(tick)
+    }
+
+    running = requestAnimationFrame(tick)
+  }
+
+  // Passive: these only cancel, they never preventDefault. Being
+  // helpful is not worth fighting the reader's thumb. They stay
+  // attached through the settle — a reader who scrolls away during it
+  // has overruled us, and we let go.
+  const watchForReader = () => {
+    window.addEventListener('wheel', stop, { passive: true })
+    window.addEventListener('touchstart', stop, { passive: true })
+    window.addEventListener('keydown', stop)
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    whenScrollable(() => {
+      window.scrollTo({ top: targetY(), behavior: 'auto' })
+      watchForReader()
+      settle()
+    })
+    return true
   }
 
   whenScrollable(() => {
@@ -113,14 +197,10 @@ export function scrollToId(id) {
       // and without this every frame would start its own animation.
       window.scrollTo({ top: from + (to - from) * ease(p), behavior: 'auto' })
       if (p < 1) running = requestAnimationFrame(frame)
-      else stop()
+      else settle()
     }
 
-    // Passive: these only cancel, they never preventDefault. Being
-    // helpful is not worth fighting the reader's thumb.
-    window.addEventListener('wheel', stop, { passive: true })
-    window.addEventListener('touchstart', stop, { passive: true })
-    window.addEventListener('keydown', stop)
+    watchForReader()
 
     running = requestAnimationFrame(frame)
   })
