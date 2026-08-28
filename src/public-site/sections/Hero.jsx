@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from 'motion/react'
 import { hall } from '../../config.js'
 import heroImg from '../../assets/images/hero.webp'
-import heroPortrait from '../../assets/images/gallery-night.webp'
+import heroPortrait from '../../assets/images/hero-entrance-portrait.webp'
 import HolographicBeams from '../../components/HolographicBeams.jsx'
 
 /* ============================================================
@@ -44,7 +44,7 @@ export default function Hero({ variant = 'photo' }) {
           <source media="(orientation: portrait)" srcSet={heroPortrait} />
           <img
             src={heroImg}
-            alt="سالن تالار پذیرایی مرمر در شبی از مراسم"
+            alt="ورودی تالار پذیرایی مرمر در غروب، آراسته برای مراسم"
             className={`hero-photo h-full w-full object-cover ${
               reduce ? '' : 'animate-kenburns'
             }`}
@@ -53,6 +53,16 @@ export default function Hero({ variant = 'photo' }) {
           />
         </picture>
       </div>
+
+      {/* Flat knock-back over the photograph — portrait only, see
+          .hero-knock in index.css.
+
+          Separate from the grade below on purpose: the grade is a
+          gradient shaped to the composition, this is one even step of
+          darkness across the whole frame. Keeping them apart means
+          either can be dialled without redrawing the other, and the
+          photograph itself stays untouched on disk. */}
+      <div className="hero-knock absolute inset-0" />
 
       {/* Warm charcoal grade — brown-black, never neutral black, so the
           wood and linen keep their warmth. Light through the middle
@@ -110,14 +120,10 @@ export default function Hero({ variant = 'photo' }) {
 
       {/* Localised scrim behind the type only. Lets the room stay bright
           at the edges while guaranteeing contrast on the wordmark, which
-          otherwise sits on the brightest part of the photograph. */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(50% 42% at 50% 46%, rgba(46,50,54,0.60) 0%, rgba(46,50,54,0.34) 48%, rgba(46,50,54,0) 78%)',
-        }}
-      />
+          otherwise sits on the brightest part of the photograph — and on
+          portrait that is literal: the neon sign over the entrance falls
+          directly behind it. Strength is per-orientation, in index.css. */}
+      <div className="hero-scrim absolute inset-0" />
 
       {/* Fine grain — soft-light so it doesn't crush the shadows */}
       <div

@@ -323,14 +323,49 @@
   filter: brightness(0.86) contrast(1.02) saturate(0.72);
 }
 
+/* Flat knock-back. Nothing on landscape — the wide photograph is
+   graded for this already — and one even step of darkness on
+   portrait, where the photograph is not. */
+.hero-knock {
+  background: transparent;
+}
+
+.hero-scrim {
+  background: radial-gradient(
+    50% 42% at 50% 46%,
+    rgba(46, 50, 54, 0.6) 0%,
+    rgba(46, 50, 54, 0.34) 48%,
+    rgba(46, 50, 54, 0) 78%
+  );
+}
+
+/* Portrait carries a different photograph, so it needs a different
+   grade. It used to be the night interior, which arrives dark and
+   needed the grade pulled back to 0.55 or it turned to mud. The
+   entrance at dusk is the opposite problem: it is bright, and
+   brightest exactly in the middle, which is where the wordmark sits.
+   So the photograph is darkened at the source and the grade is let
+   back up, instead of being held off. */
 @media (orientation: portrait) {
   .hero-photo {
-    filter: brightness(1) contrast(1.01) saturate(0.78);
+    filter: brightness(0.74) contrast(1.09) saturate(0.74);
   }
-  /* The night photograph carries its own shadows — a full-strength
-     grade on top would crush it to mud. */
   .hero-grade {
-    opacity: 0.55;
+    opacity: 0.9;
+  }
+  .hero-knock {
+    background: rgba(46, 50, 54, 0.12);
+  }
+  /* Wider and deeper than the landscape scrim. The wordmark sits at
+     46% of the height, which on this photograph is exactly where the
+     neon sign is — the one thing in frame brighter than white type. */
+  .hero-scrim {
+    background: radial-gradient(
+      62% 46% at 50% 46%,
+      rgba(46, 50, 54, 0.72) 0%,
+      rgba(46, 50, 54, 0.46) 52%,
+      rgba(46, 50, 54, 0) 82%
+    );
   }
 }
 
