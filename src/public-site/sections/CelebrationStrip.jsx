@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { celebration } from '../../data/content.js'
 import { img } from '../../data/images.js'
 import useReveal from '../../lib/useReveal.js'
+import phoneBg from '../../assets/images/celebration-strip-phone.webp'
 
 /* ============================================================
    CELEBRATION STRIP — a breath between two dense sections.
@@ -24,11 +26,20 @@ export default function CelebrationStrip() {
   // The line and the rule under it are one gesture, on one trigger.
   const [ref, shown] = useReveal()
 
+  /* A phone gets a different photograph behind the band. The desktop
+     shot is a wide frame filling a wide band; at phone width the band
+     is nearly square and that frame is cropped to a sliver of itself,
+     so the phone gets the chandelier instead — a subject that reads at
+     any size. Resolved at mount, like the gallery pair, so only one
+     of the two is ever fetched. */
+  const [phone] = useState(() => window.matchMedia?.('(max-width: 767px)').matches ?? false)
+  const background = phone ? phoneBg : img('celebrationStrip')
+
   return (
     <section
       aria-label={celebration.alt}
       className="relative isolate flex min-h-[45vh] items-center justify-center overflow-hidden bg-base bg-cover bg-center bg-scroll lg:min-h-[60vh] lg:bg-fixed"
-      style={{ backgroundImage: `url(${img('celebrationStrip')})` }}
+      style={{ backgroundImage: `url(${background})` }}
     >
       {/* Light scrim in the page's own ground colour, so the photograph
           reads as part of the palette rather than a window cut into it.
