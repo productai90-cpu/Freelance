@@ -202,9 +202,17 @@ export default function Nav({ heroVariant, onToggleHero }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.32 }}
-            className="fixed inset-0 z-50 bg-ink md:hidden"
+            /* The sheet is taller than a short phone: five links, the
+               lighting switch and two numbers come to roughly 720px, so
+               on anything smaller than an iPhone SE the second number
+               sat below the fold with no way to reach it — the panel
+               was a plain `inset-0` box with nothing scrollable in it,
+               and the body behind it is locked while it is open. The
+               sheet is the scroller now, with the close row pinned so
+               the way out never scrolls away. */
+            className="fixed inset-0 z-50 flex flex-col bg-ink md:hidden"
           >
-            <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex shrink-0 items-center justify-between px-6 py-4">
               <span className="flex items-center gap-2.5">
                 <Monogram size={30} tone="light" />
                 <span className="font-display text-xl font-light text-surface">{hall.name}</span>
@@ -219,7 +227,7 @@ export default function Nav({ heroVariant, onToggleHero }) {
               </button>
             </div>
 
-            <nav className="flex flex-col px-6 pt-8">
+            <nav className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
               {LINKS.map((l, i) => (
                 <motion.a
                   key={l.href}
@@ -228,7 +236,7 @@ export default function Nav({ heroVariant, onToggleHero }) {
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.08 + i * 0.06, duration: 0.4 }}
-                  className="border-b border-surface/10 py-5 font-display text-2xl font-light text-surface"
+                  className="border-b border-surface/10 py-4 font-display text-2xl font-light text-surface"
                 >
                   {l.label}
                 </motion.a>
@@ -242,7 +250,7 @@ export default function Nav({ heroVariant, onToggleHero }) {
                 <LightingSwitch
                   variant={heroVariant}
                   onToggle={onToggleHero}
-                  className="flex w-full items-center gap-3 border-b border-surface/10 py-5 font-display text-2xl font-light text-surface/70 transition-colors duration-300 hover:text-surface"
+                  className="flex w-full items-center gap-3 border-b border-surface/10 py-4 font-display text-2xl font-light text-surface/70 transition-colors duration-300 hover:text-surface"
                   dotClass="h-1.5 w-1.5"
                 />
               </motion.div>
@@ -251,7 +259,7 @@ export default function Nav({ heroVariant, onToggleHero }) {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.48, duration: 0.4 }}
-                className="mt-10 flex flex-col gap-3"
+                className="mt-8 flex shrink-0 flex-col gap-3"
               >
                 <a
                   href={`tel:${hall.phoneHref}`}
