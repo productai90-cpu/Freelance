@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import { Container, SectionTitle } from '../../components/Section.jsx'
 import MaskReveal from '../../components/MaskReveal.jsx'
@@ -6,11 +6,17 @@ import { gallery } from '../../data/content.js'
 import nightImg from '../../assets/images/gallery-night.webp'
 import tableImg from '../../assets/images/table.webp'
 import gardenImg from '../../assets/images/garden.webp'
+import tablePhoneImg from '../../assets/images/gallery-table-phone.webp'
+import gardenPhoneImg from '../../assets/images/gallery-garden-phone.webp'
 
+/* `phone` is an alternate for the same slot, not an extra shot: the
+   two lower frames carry photographs of the hall's own tables and its
+   own garden on a phone, where the gallery is the whole of what most
+   visitors see of the venue. The desktop pair is unchanged. */
 const SHOTS = [
   { src: nightImg, caption: gallery.captions.night, id: 'night' },
-  { src: tableImg, caption: gallery.captions.table, id: 'table' },
-  { src: gardenImg, caption: gallery.captions.garden, id: 'garden' },
+  { src: tableImg, phone: tablePhoneImg, caption: gallery.captions.table, id: 'table' },
+  { src: gardenImg, phone: gardenPhoneImg, caption: gallery.captions.garden, id: 'garden' },
 ]
 
 const EASE = [0.22, 0.61, 0.36, 1]
@@ -69,6 +75,16 @@ function Frame({ shot, className = '', onOpen, priority = false, parallaxY = nul
 }
 
 export default function Gallery() {
+  /* Resolved once, at mount, so nothing loads twice and the lightbox
+     opens the same photograph the frame was showing. A phone does not
+     cross this breakpoint mid-visit; a desktop that is resized keeps
+     the desktop pair, which is the right answer anyway. */
+  const [phone] = useState(() => window.matchMedia?.('(max-width: 767px)').matches ?? false)
+  const shots = useMemo(
+    () => SHOTS.map((s) => (phone && s.phone ? { ...s, src: s.phone } : s)),
+    [phone],
+  )
+
   const [active, setActive] = useState(null)
   const reduce = useReducedMotion()
   const sectionRef = useRef(null)
@@ -112,7 +128,7 @@ export default function Gallery() {
           <div ref={leadRef}>
             <MaskReveal>
               <Frame
-                shot={SHOTS[0]}
+                shot={shots[0]}
                 priority
                 onOpen={setActive}
                 parallaxY={reduce ? null : leadDrift}
@@ -127,7 +143,7 @@ export default function Gallery() {
           <div className="mt-6 grid grid-cols-1 gap-6 lg:mt-8 lg:grid-cols-12 lg:gap-8">
             <MaskReveal delay={80} className="lg:col-span-7">
               <Frame
-                shot={SHOTS[1]}
+                shot={shots[1]}
                 onOpen={setActive}
                 parallaxY={reduce ? null : pairDrift}
                 inset="-6%"
@@ -136,7 +152,7 @@ export default function Gallery() {
             </MaskReveal>
             <MaskReveal delay={180} className="lg:col-span-5 lg:mt-14">
               <Frame
-                shot={SHOTS[2]}
+                shot={shots[2]}
                 onOpen={setActive}
                 className="aspect-[4/3] max-h-[60vh] lg:max-h-[52vh]"
               />
