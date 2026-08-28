@@ -4,7 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#E8EAEC" />
+    <!-- Phones ignore an SVG-only favicon. Safari, Android home screens and
+         the in-app browsers inside Telegram/Instagram look for a PNG, an
+         apple-touch-icon or favicon.ico, and substitute the host app's own
+         logo when they find none. Regenerate with `npm run icons`. -->
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+    <link rel="icon" href="./favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="تالار مرمر" />
     <title>تالار پذیرایی مرمر</title>
     <meta
       name="description"
@@ -13,6 +22,12 @@
     <meta property="og:title" content="تالار پذیرایی مرمر" />
     <meta property="og:description" content="آغازی که در سنگ می‌ماند." />
     <meta property="og:type" content="website" />
+    <!-- Absolute on purpose: link scrapers (Telegram, WhatsApp) do not
+         resolve relative og:image paths. Update the origin if the site
+         moves to its own domain. -->
+    <meta property="og:url" content="https://productai90-cpu.github.io/Freelance/" />
+    <meta property="og:image" content="https://productai90-cpu.github.io/Freelance/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <div id="root"></div>
