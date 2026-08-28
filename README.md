@@ -69,21 +69,26 @@ A new client should be a config edit, not a rebuild.
 
 The build is configured for a Pages subpath from the start: `base: './'` for relative assets, hash routing so deep links never 404, and self-hosted fonts so nothing depends on a CDN.
 
-### Option A — GitHub Actions (recommended)
+### Deploying
 
-`.github/workflows/deploy.yml` is already set up.
+`.github/workflows/deploy.yml` is already set up, and it is the only
+way this site ships.
 
 1. Push the repo to GitHub.
 2. **Settings → Pages → Source → GitHub Actions**.
-3. Every push to `main` redeploys automatically.
+3. Every push to `main` redeploys automatically. Nothing else does.
 
-### Option B — manual
+That last sentence is the whole section. There used to be a second,
+"manual" option here — an `npm run deploy` script that pushed `dist/`
+to a `gh-pages` branch — and it was a trap: Pages is serving the
+Actions artifact, so publishing to that branch succeeded, printed
+"Published", and changed nothing at all on the live site. Both the
+script and the dependency behind it have been removed so the trap
+cannot be walked into again.
 
-```bash
-npm run deploy    # builds and pushes dist/ to the gh-pages branch
-```
-
-Then set **Settings → Pages → Source → Deploy from a branch → `gh-pages` / root**.
+**To ship: commit to `main` and push.** Then watch the Actions tab, or
+just poll the live page until the hashed bundle name in its `<script>`
+tag changes.
 
 ### Verifying before you ship
 
