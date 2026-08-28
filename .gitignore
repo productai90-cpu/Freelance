@@ -16,7 +16,8 @@ Talar.txt
 New images/
 
 # Working documents, not site code — the blank menu form sent to the
-# hall owner, and the reusable templates for building the next site.
+# hall owner. The reusable build workflow in _workflow/ IS tracked:
+# it is the point of keeping this repo as a template.
 MENU.md
 _TEMPLATE-*.md
 
