@@ -1,98 +1,37 @@
 /* ============================================================
    ANCHOR SCROLLING
 
-   Two things the browser's own `scroll-behavior: smooth` cannot do.
+   Go straight there. Do not tour the page on the way.
 
-   1. TIMING. Its duration is the browser's business, not ours, and
-      it is slow — long enough that it reads as a different site from
-      the one whose every transition is 300ms.
+   ---- What this used to do, and why it stopped ----
 
-   2. A MOVING TARGET. It computes the destination once, at click
-      time, and never revises it. This page keeps growing after that:
-      font-display is swap, so the display faces arrive mid-scroll and
-      reflow every heading in nine sections. Over the longest jump on
-      the site — the hero's call to action down to the form — the
-      drift added up to a whole section, which is why that button
-      used to land on the testimonials.
+   Earlier versions animated the scroll position across the whole
+   document — from the hero to the form is some ten thousand pixels —
+   and every section between the two flew past the reader on the way.
+   That was never what the button promised. Someone pressing
+   «استعلام تاریخ و رزرو» is not asking to be shown the gallery, the
+   menu and the testimonials at speed; they are asking for the form.
 
-   Animating it ourselves solves both, and the second falls out for
-   free: the destination is re-read EVERY FRAME, so a page that grows
-   underneath the scroll is simply followed rather than fought.
+   The long flight also cost more than it looked. It took half a
+   second during which the reader was holding a phone, and anything
+   that happened in that window — a thumb settling on the glass, the
+   address bar collapsing, a late reflow — had a moving target to
+   land in the middle of. Several bugs lived in that window, and all
+   of them were bugs about the window rather than about the
+   destination.
+
+   So the position changes at once, and the DESTINATION does the
+   moving instead: it rises a few pixels and fades up, which is the
+   same gesture every other reveal on this site uses. The reader gets
+   "here it is" rather than "watch me get there", and the window in
+   which anything can go wrong is gone.
    ============================================================ */
 
-/* The site's one easing curve, the same cubic-bezier every CSS
-   transition uses. Solved by bisection — cheap enough per frame and
-   it keeps the scroll in the same motion language as everything else
-   rather than inventing a second feel for one interaction. */
-const [X1, Y1, X2, Y2] = [0.22, 0.61, 0.36, 1]
-
-const bezier = (t, a, b) => {
-  const u = 1 - t
-  return 3 * u * u * t * a + 3 * u * t * t * b + t * t * t
-}
-
-function ease(x) {
-  let lo = 0
-  let hi = 1
-  let t = x
-  for (let i = 0; i < 12; i++) {
-    t = (lo + hi) / 2
-    if (bezier(t, X1, X2) < x) lo = t
-    else hi = t
-  }
-  return bezier(t, Y1, Y2)
-}
-
-/* Fast, and only a little longer for a longer trip. A fixed duration
-   makes a short hop feel sluggish; a purely proportional one makes a
-   full-page jump take seconds. */
-const duration = (distance) => Math.min(560, 300 + Math.abs(distance) * 0.06)
-
-/* The menu lightbox pins `body { overflow: hidden }` while it is open,
-   and its call to action both closes the dialog AND links to #inquiry.
-   Closing has an exit animation, so the lock outlives the click by a
-   few frames — long enough to swallow the scroll entirely. */
+/* The menu lightbox pins `body { overflow: hidden }` while it is
+   open, and its call to action both closes the dialog AND links to
+   #inquiry. Closing has an exit animation, so the lock outlives the
+   click by a few frames — long enough to swallow the jump entirely. */
 const LOCK_WAIT_MS = 700
-
-/* ---- Landing is not the same as arriving ----
-
-   Re-reading the destination every frame keeps the scroll honest
-   WHILE it runs, but the page is not finished moving when the scroll
-   is. On a phone the hero's call to action is the full length of the
-   site, the animation is capped at 560ms, and whatever changes the
-   height above the form — a display face arriving on
-   `font-display: swap` and reflowing nine headings, a section
-   settling, the address bar collapsing and changing every `vh` —
-   can easily land after that. Growth above the viewport pushes
-   content down while `scrollY` stays where it was, so the reader
-   ends up higher in the page than they were left: on the
-   testimonials, one section short of the form.
-
-   So we hold the landing. After the animation ends the destination
-   is still re-read every frame and any drift is closed at once — an
-   instant correction, because it is the PAGE that moved, not the
-   reader, and the right result is the form sitting still while the
-   content above it settles.
-
-   ---- Knowing when to let go ----
-
-   Not by asking about fonts. `document.fonts.status` reports
-   'loaded' whenever nothing is pending AT THAT MOMENT, which on a
-   fresh page is true before any text has been laid out and any font
-   requested — so a fonts-ready check is answered "yes" long before
-   the fonts are anywhere, and would release the landing on exactly
-   the slow first visit it exists for.
-
-   Watch the target instead. It is the thing we actually care about,
-   it reports every cause at once — fonts, images, reflow, the
-   address bar — and it needs no guess about which of them is in
-   play. Hold while it keeps moving; let go once it has been still
-   for a moment. The floor stops a single late frame from ending it
-   early, the ceiling stops a page that never settles from holding
-   the reader forever. */
-const SETTLE_MIN_MS = 350   // never let go sooner than this
-const SETTLE_QUIET_MS = 400 // ...nor until the target has been still this long
-const SETTLE_MAX_MS = 2500  // ...and never hold longer than this
 
 function whenScrollable(run) {
   const started = performance.now()
@@ -104,7 +43,31 @@ function whenScrollable(run) {
   check()
 }
 
+/* Arriving is worth 320ms; travelling is worth none. Matched to the
+   site's one easing curve so the landing belongs to the same motion
+   language as every other reveal rather than inventing a second. */
+const ARRIVE_MS = 320
+const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
+
+/* How long to keep an eye on the landing, and how far we are willing
+   to move the reader while doing it.
+
+   The page can still shift by a few pixels just after the jump — a
+   display face swapping in on `font-display: swap` will reflow the
+   headings above. Correcting that keeps the form where it was put.
+
+   But the correction is CAPPED, and the cap is the important half.
+   An unbounded correction trusts the measurement absolutely: when
+   something does go wrong with it — a clamp against a page that is
+   briefly shorter, a rect read mid-animation — the reader gets
+   hauled backwards through a section, which is far worse than the
+   drift it was there to fix. Past this distance we assume we are the
+   ones who are wrong and leave the reader alone. */
+const HOLD_MS = 700
+const MAX_CORRECTION = 120
+
 let running = 0
+let release = null
 
 export function scrollToId(id) {
   const section = document.getElementById(id)
@@ -112,9 +75,16 @@ export function scrollToId(id) {
 
   /* A section may nominate what the reader should actually land on.
      The inquiry section leads with a heading and an intro, but the
-     thing someone pressing "استعلام تاریخ و رزرو" came for is the
-     form — so it marks the form and we aim there instead. */
-  const el = section.querySelector('[data-scroll-anchor]') ?? section
+     thing someone pressing «استعلام تاریخ و رزرو» came for is the
+     form — so it marks the form and we aim there instead.
+
+     The ownership check is not decoration. `#top` is a <div id="top">
+     wrapping the ENTIRE page, so an unscoped querySelector finds the
+     inquiry form inside it and every back-to-top link on the site
+     quietly becomes another link to the booking form. A marker counts
+     only for the section that is its nearest identified ancestor. */
+  const marked = section.querySelector('[data-scroll-anchor]')
+  const el = marked?.closest('[id]') === section ? marked : section
 
   const padding =
     parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0
@@ -125,7 +95,48 @@ export function scrollToId(id) {
     return Math.max(0, Math.min(want, max))
   }
 
-  cancelAnimationFrame(running)
+  // Any previous landing is over the moment a new one is asked for.
+  release?.()
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  whenScrollable(() => {
+    /* 'instant', never 'auto'.
+
+       `behavior: 'auto'` does NOT mean "jump" — it means "use the
+       element's computed scroll-behavior", and this site sets
+       `html { scroll-behavior: smooth }`. So every scrollTo in this
+       file used to be a smooth scroll, including the ones written
+       specifically to avoid one. That is why the page still toured
+       itself on the way to the form after the animation here was
+       removed: the animation was gone, but the browser was quietly
+       running its own in its place. */
+    const landed = targetY()
+    window.scrollTo({ top: landed, behavior: 'instant' })
+
+    /* The destination introduces itself. Not a page transition and
+       not a veil: the one element the reader came for, doing the
+       same short rise that every section on this site does when you
+       reach it. */
+    if (!reduce && typeof el.animate === 'function') {
+      el.animate(
+        [
+          { opacity: 0, transform: 'translateY(10px)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+        { duration: ARRIVE_MS, easing: EASE },
+      )
+    }
+
+    hold(targetY, landed)
+  })
+
+  return true
+}
+
+/* Keep the landing honest for a moment, within reason. */
+function hold(targetY, landed) {
+  const started = performance.now()
 
   const stop = () => {
     cancelAnimationFrame(running)
@@ -133,31 +144,22 @@ export function scrollToId(id) {
     window.removeEventListener('touchstart', mark)
     window.removeEventListener('touchmove', drag)
     window.removeEventListener('keydown', stop)
+    release = null
   }
 
   /* ---- Contact is not an instruction ----
 
-     This pair replaces what used to be a plain `touchstart -> stop`,
-     and that listener was the entire bug this file kept failing to
-     fix. On a phone, pressing a button and then letting your thumb
-     rest on the glass is not one gesture followed by another — it is
-     just how a thumb behaves. `touchstart` fired, the scroll was
-     abandoned wherever it had got to, and the reader was left in the
-     middle of the page. Land on the glass 350ms after the tap and
-     you stop in the testimonials, one section short of the form,
-     every time.
+     This pair replaces what was once a plain `touchstart -> stop`,
+     and that listener was a bug all of its own. On a phone, pressing
+     a button and then letting your thumb rest on the glass is not
+     one gesture followed by another — it is simply how a thumb
+     behaves. The event fired and the landing was abandoned. A mouse
+     never touches the screen, so it only ever went wrong on phones.
 
-     Nothing was wrong with the measuring; the flight was being shot
-     down. And it could only ever happen on a phone, because a mouse
-     never touches the screen — which is exactly how it survived
-     three passes that all assumed the arithmetic was at fault.
-
-     So: cancel on MOVEMENT, not on contact. A finger that has
-     travelled past the slop is a reader scrolling, and they win
-     immediately. A finger that is merely down is a reader waiting to
-     see where they land. */
-  const SLOP = 8 // px of travel before it counts as a scroll, not a rest
-
+     Cancel on MOVEMENT. A finger past the slop is a reader scrolling
+     and they win at once; a finger merely down is a reader waiting
+     to see where they have landed. */
+  const SLOP = 8
   let fromY = 0
   const mark = (e) => {
     fromY = e.touches[0]?.clientY ?? 0
@@ -167,79 +169,29 @@ export function scrollToId(id) {
     if (Math.abs(y - fromY) > SLOP) stop()
   }
 
-  /* Hold the landing: correct drift until the page stops moving.
-     Costs nothing when nothing moves — it is a read and a compare. */
-  const settle = () => {
-    const started = performance.now()
-    let last = targetY()
-    let stillSince = started
-
-    const tick = (now) => {
-      const to = targetY()
-
-      // A pixel of slack throughout. Sub-pixel layout, and the
-      // rounding some browsers apply to scrollY, would otherwise
-      // read as perpetual movement and never let this finish.
-      if (Math.abs(to - last) > 1) {
-        last = to
-        stillSince = now // the page moved under us — keep holding
-      }
-      if (Math.abs(window.scrollY - to) > 1) {
-        window.scrollTo({ top: to, behavior: 'auto' })
-      }
-
-      const elapsed = now - started
-      const settled = now - stillSince >= SETTLE_QUIET_MS && elapsed >= SETTLE_MIN_MS
-      if (settled || elapsed >= SETTLE_MAX_MS) stop()
-      else running = requestAnimationFrame(tick)
-    }
-
-    running = requestAnimationFrame(tick)
-  }
+  release = stop
 
   // Passive: these only ever cancel, they never preventDefault.
-  // Being helpful is not worth fighting the reader's thumb. They stay
-  // attached through the settle — a reader who scrolls away during it
-  // has overruled us, and we let go at once.
-  const watchForReader = () => {
-    window.addEventListener('wheel', stop, { passive: true })
-    window.addEventListener('touchstart', mark, { passive: true })
-    window.addEventListener('touchmove', drag, { passive: true })
-    window.addEventListener('keydown', stop)
-  }
+  window.addEventListener('wheel', stop, { passive: true })
+  window.addEventListener('touchstart', mark, { passive: true })
+  window.addEventListener('touchmove', drag, { passive: true })
+  window.addEventListener('keydown', stop)
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    whenScrollable(() => {
-      window.scrollTo({ top: targetY(), behavior: 'auto' })
-      watchForReader()
-      settle()
-    })
-    return true
-  }
+  const tick = (now) => {
+    const to = targetY()
+    const drift = to - window.scrollY
 
-  whenScrollable(() => {
-    const from = window.scrollY
-    const total = duration(targetY() - from)
-    const t0 = performance.now()
-
-    const frame = (now) => {
-      const p = Math.min((now - t0) / total, 1)
-      // Re-read the destination every frame: if the page grew above
-      // us while the scroll was running, follow it.
-      const to = targetY()
-      // behavior:'auto' is required — CSS scroll-behavior is smooth,
-      // and without this every frame would start its own animation.
-      window.scrollTo({ top: from + (to - from) * ease(p), behavior: 'auto' })
-      if (p < 1) running = requestAnimationFrame(frame)
-      else settle()
+    // A pixel of slack: sub-pixel layout and the rounding some
+    // browsers apply to scrollY are not movement.
+    if (Math.abs(drift) > 1 && Math.abs(to - landed) <= MAX_CORRECTION) {
+      window.scrollTo({ top: to, behavior: 'instant' })
     }
 
-    watchForReader()
+    if (now - started >= HOLD_MS) stop()
+    else running = requestAnimationFrame(tick)
+  }
 
-    running = requestAnimationFrame(frame)
-  })
-
-  return true
+  running = requestAnimationFrame(tick)
 }
 
 /* One delegated listener covers every in-page link on the site — the
