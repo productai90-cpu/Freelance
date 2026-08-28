@@ -13,7 +13,7 @@ import menuPlated from '../assets/images/menu-plated.webp'
 import menuDessert from '../assets/images/menu-dessert.webp'
 import menuSweets from '../assets/images/menu-sweets.webp'
 import aboutHall from '../assets/images/about-hall.webp'
-import aboutCouple from '../assets/images/about-couple.webp'
+import aboutWelcome from '../assets/images/about-welcome.webp'
 import couple1 from '../assets/images/couple-1.webp'
 import couple2 from '../assets/images/couple-2.webp'
 import couple3 from '../assets/images/couple-3.webp'
@@ -32,7 +32,7 @@ export const IMAGES = {
 
   // دربارهٔ ما
   aboutHall,
-  aboutCouple,
+  aboutWelcome,
 
   // زوج‌ها
   couple1,

@@ -207,7 +207,14 @@ function StackedPair({ back, front, reduce }) {
               : { opacity: 0, y: 26, rotate: -10 }
         }
         transition={{ duration: 1, delay: 0.35, ease: EASE }}
-        className="absolute bottom-0 left-0 w-[62%] origin-bottom-left"
+        /* Inset from the left below lg. The frame rotates about its
+           bottom-left corner, so the TOP-left corner swings outward by
+           its own height x sin(6deg) — about 8.6% of the pair's width,
+           whatever the width is. On desktop the panel's px-16 absorbs
+           that; on a phone px-6 does not, and the corner was landing
+           outside the panel and being clipped by the section. 9% is
+           that swing plus a hair. */
+        className="absolute bottom-0 left-[9%] w-[62%] origin-bottom-left lg:left-0"
       >
         <div className="aspect-[3/4] border-4 border-surface bg-line/25 shadow-lift">
           <img
