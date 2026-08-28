@@ -73,7 +73,12 @@ export default function CelebrationStrip() {
           }}
         />
 
-        <p className="mt-7 text-balance font-display text-2xl font-light leading-relaxed text-ink sm:text-3xl">
+        {/* One weight heavier on a phone, and only there. The chandelier
+            behind it is all fine bright detail, which a 300 that Markazi
+            clamps to 400 anyway does not cut through at that size; 500 is
+            the next real step inside the face. Desktop sits on a calmer
+            frame at a larger size and keeps the light weight. */}
+        <p className="mt-7 text-balance font-display text-2xl font-medium leading-relaxed text-ink sm:text-3xl sm:font-light">
           {celebration.line}
         </p>
       </motion.div>
