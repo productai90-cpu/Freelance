@@ -66,6 +66,32 @@ const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
 const HOLD_MS = 700
 const MAX_CORRECTION = 120
 
+/* Where the element sits in LAYOUT — deliberately not
+   getBoundingClientRect().
+
+   The rect includes every transform on the element and on its
+   ancestors, and this page is full of them: the destination plays a
+   short rise on arrival, and the Reveal wrapper around it animates
+   y:18 -> 0 the first time it is seen. Measured through the rect the
+   target therefore MOVES while those animations run, and the
+   correction below chases it faithfully — nudging the page a few
+   pixels up and down for as long as the entrance lasts. That is the
+   shake, and it is the correction doing exactly what it was told.
+
+   Walking offsetTop instead gives the position the element occupies
+   in layout: where it will still be once every animation is over,
+   which is the only position worth aiming at. */
+function layoutTop(node) {
+  let y = 0
+  for (let el = node; el; el = el.offsetParent) y += el.offsetTop
+  return y
+}
+
+/* Below this, a difference is sub-pixel layout and font hinting
+   rather than the page actually moving. Correcting it would be
+   visible motion in service of nothing. */
+const DEAD_ZONE = 2
+
 let running = 0
 let release = null
 
@@ -91,8 +117,7 @@ export function scrollToId(id) {
 
   const targetY = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight
-    const want = el.getBoundingClientRect().top + window.scrollY - padding
-    return Math.max(0, Math.min(want, max))
+    return Math.max(0, Math.min(layoutTop(el) - padding, max))
   }
 
   // Any previous landing is over the moment a new one is asked for.
@@ -181,9 +206,7 @@ function hold(targetY, landed) {
     const to = targetY()
     const drift = to - window.scrollY
 
-    // A pixel of slack: sub-pixel layout and the rounding some
-    // browsers apply to scrollY are not movement.
-    if (Math.abs(drift) > 1 && Math.abs(to - landed) <= MAX_CORRECTION) {
+    if (Math.abs(drift) > DEAD_ZONE && Math.abs(to - landed) <= MAX_CORRECTION) {
       window.scrollTo({ top: to, behavior: 'instant' })
     }
 
