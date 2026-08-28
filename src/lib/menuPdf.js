@@ -19,6 +19,8 @@ import { ICON_SHAPES, SVG_PROPS } from '../components/ServiceIcons.jsx'
 import { menu, celebration } from '../data/content.js'
 import { img } from '../data/images.js'
 import { toFa } from './digits.js'
+import estedadUrl from '../assets/fonts/Estedad-Variable.woff2'
+import vazirmatnUrl from '../assets/fonts/Vazirmatn-Variable.woff2'
 
 /* A4 at 96dpi. 210mm wide, so 1px here is 210/794 mm on the page. */
 const PAGE_W = 794
@@ -41,8 +43,53 @@ const C = {
   white: '#ffffff',
 }
 
-const FONT = "'Vazirmatn', 'Estedad', system-ui, sans-serif"
-const DISPLAY = "'Estedad', 'Vazirmatn', system-ui, sans-serif"
+/* Deliberately NOT the site's font stack.
+
+   html2canvas draws a word in one call only while the whole word sits
+   in one font. The moment a range over a word returns more than one
+   client rect — which is exactly what a mid-word fallback produces —
+   it gives up and draws the word letter by letter instead. In Persian
+   that severs every join, and the word arrives in the PDF as a row of
+   loose letters. It showed up on phones first because that is where a
+   fallback was likeliest: `system-ui` is Roboto on Android, which has
+   no Arabic at all, and the snapshot is taken inside a cloned iframe
+   that has to fetch the webfonts a second time.
+
+   So the booklet gets its own two faces, embedded as data URIs under
+   private names and awaited before anything is measured. Nothing to
+   re-fetch in the clone, nothing to fall back to. */
+const FONT = "'Vazirmatn PDF', sans-serif"
+const DISPLAY = "'Estedad PDF', sans-serif"
+
+const EMBEDDED_FACES = [
+  { family: 'Vazirmatn PDF', url: vazirmatnUrl },
+  { family: 'Estedad PDF', url: estedadUrl },
+]
+
+/* Read once, kept for the rest of the session — the second download
+   of the booklet should not re-encode a quarter of a megabyte. */
+let facesCss = null
+
+async function embeddedFontCss() {
+  if (facesCss) return facesCss
+
+  const faces = await Promise.all(
+    EMBEDDED_FACES.map(async ({ family, url }) => {
+      const bytes = new Uint8Array(await (await fetch(url)).arrayBuffer())
+      let binary = ''
+      // In chunks: one spread of 120k arguments overflows the stack.
+      for (let i = 0; i < bytes.length; i += 8192) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192))
+      }
+      return `@font-face{font-family:'${family}';src:url(data:font/woff2;base64,${btoa(
+        binary,
+      )}) format('woff2');font-weight:100 900;font-style:normal;font-display:block}`
+    }),
+  )
+
+  facesCss = faces.join('')
+  return facesCss
+}
 
 /* ------------------------------------------------------------
    Icons — the same stroke data the site draws, flattened to
@@ -288,15 +335,19 @@ export async function downloadMenuPdf(packages = menu.packages) {
     import('html2canvas-pro').then((m) => m.default ?? m),
   ])
 
-  // Webfonts must be resolved before the snapshot, or the sheet is
-  // captured in the fallback face and the whole booklet looks wrong.
-  if (document.fonts?.ready) await document.fonts.ready
+  const style = document.createElement('style')
+  style.textContent = await embeddedFontCss()
+  document.head.appendChild(style)
 
   const stage = document.createElement('div')
   stage.setAttribute('dir', 'rtl')
   stage.setAttribute('lang', 'fa')
+  /* text-size-adjust: a 794px stage on a 390px phone is exactly the
+     shape Android's font boosting looks for, and boosted type would
+     reflow every sheet out of its page. */
   stage.style.cssText = `position:fixed;top:0;right:-${PAGE_W + 200}px;width:${PAGE_W}px;
-    font-family:${FONT};font-weight:350;background:${C.surface};z-index:-1;pointer-events:none;`
+    font-family:${FONT};font-weight:350;background:${C.surface};z-index:-1;pointer-events:none;
+    -webkit-text-size-adjust:100%;text-size-adjust:100%;`
 
   const sheets = [coverSheet(), ...packages.map(packageSheet)]
   stage.innerHTML = sheets
@@ -304,6 +355,18 @@ export async function downloadMenuPdf(packages = menu.packages) {
     .join('')
 
   document.body.appendChild(stage)
+
+  /* fonts.ready alone only promises that the loads already in flight
+     have settled — a face nothing has painted yet is not in flight.
+     Ask for these two by name, against a Persian sample, so they are
+     genuinely resolved before a single line is measured. */
+  if (document.fonts?.load) {
+    await Promise.all([
+      document.fonts.load(`350 16px 'Vazirmatn PDF'`, 'آزمایش'),
+      document.fonts.load(`300 32px 'Estedad PDF'`, 'آزمایش'),
+    ])
+    await document.fonts.ready
+  }
 
   try {
     await imagesReady(stage)
@@ -355,5 +418,6 @@ export async function downloadMenuPdf(packages = menu.packages) {
     pdf.save(menu.pdf.fileName)
   } finally {
     stage.remove()
+    style.remove()
   }
 }
